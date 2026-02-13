@@ -1,0 +1,27 @@
+[
+    {
+      "title": "Modali",
+      "url": "modali.html",
+      "content": "Le finestre modali permettono di mostrare contenuti sovrapposti alla pagina principale, come testi o gallery.",
+      "keywords": ["modali", "finestre", "popup", "contenuti sovrapposti"],
+      "category": "Interfaccia",
+      "relevance": 1
+    },
+    {
+      "title": "Contenuto testuale",
+      "url": "contenuto.html",
+      "content": "Questa sezione è progettata per una lettura fluida e organizzata con struttura a blocchi e gerarchie visive.",
+      "keywords": ["contenuto", "tipografia", "paragrafi", "organizzazione"],
+      "category": "Design",
+      "relevance": 2
+    },
+    {
+      "title": "Regole tipografiche",
+      "url": "tipografia.html",
+      "content": "Uso di paragrafi, intestazioni, .lead e .fs-base per organizzare testi in modo leggibile.",
+      "keywords": ["tipografia", "paragrafi", "lead", ".fs-base"],
+      "category": "Design",
+      "relevance": 3
+    }
+  ]
+  
