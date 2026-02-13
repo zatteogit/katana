@@ -14,14 +14,28 @@ katana/
 │
 ├── tool/           ← Dev tool React (analisi Figma vs Config)
 │   ├── src/
+│   │   └── app/
+│   │       ├── App.tsx
+│   │       └── components/
+│   │           ├── analysis-data.ts
+│   │           ├── ComparisonCard.tsx
+│   │           ├── KatanaCodeTab.tsx
+│   │           ├── KatanaPreviewTab.tsx
+│   │           ├── KatanaRepoTab.tsx
+│   │           └── katana-files/
+│   │               ├── data-js-code.ts
+│   │               ├── script-js-code.ts
+│   │               ├── style-css-code.ts
+│   │               └── index-html-code.ts
 │   ├── package.json
-│   └── ...
+│   └── vite.config.ts
 │
+├── build-dist.js   ← Script per rigenerare dist/ dai sorgenti TS
 ├── .gitignore
 └── README.md
 ```
 
-## dist/ — Katana App
+## dist/ — Katana App (Output)
 
 I 4 file in `dist/` compongono l'applicazione Katana completa.
 Per utilizzarla, apri `index.html` direttamente nel browser (funziona offline).
@@ -29,30 +43,11 @@ Per utilizzarla, apri `index.html` direttamente nel browser (funziona offline).
 ### Versione corrente: v3.0 Stable
 - Smart Asset Detection (`detectAssetFromFile()`)
 - Overlay Zones (oz) — Area Testi + Area Loghi
-- Export PSD con layer (sorgente + overlay)
+- Export PSD con layer (sorgente + overlay via ag-psd)
 - Modale custom brutalist per conferma detection
+- 3 canali: Poste.it Retail, Corporate, Social Media Kit
 
-### Struttura SITE_CONFIG
-
-```
-Site → Components → Variants → Assets
-```
-
-**Canali:** Poste.it (Retail), Corporate, Social Media Kit
-
-**Chiavi asset:**
-| Chiave | Descrizione |
-|--------|-------------|
-| `w`, `h` | Dimensioni @1x in pixel |
-| `d` | Se `true`, esporta anche @2x |
-| `f` | Focus Area — dove METTERE il soggetto |
-| `oz` | Overlay Zones — dove NON mettere il soggetto |
-| `fl` | Focus Label descrittiva |
-| `m` | `"circle"` per maschera circolare |
-| `targetKB` | Peso massimo in KB |
-| `controlH` | Altezza variabile {min, max, step} |
-
-## tool/ — Frame Analyzer
+## tool/ — Frame Analyzer (Dev Tool)
 
 App React (Vite + Tailwind) per analizzare le misure dei frame Figma
 rispetto alla SITE_CONFIG corporate.
@@ -68,16 +63,22 @@ pnpm dev
 - **Analisi**: Confronto Figma vs Config con filtri e statistiche
 - **Schema oz**: Documentazione proposta Overlay Zones
 - **Preview**: Live preview dei 4 file combinati in iframe
-- **JSON Corretto**: SITE_CONFIG aggiornata con correzioni
-- **Codice Katana**: I 4 file pronti per copy-paste
-- **Repository**: Struttura repo e export file
+- **JSON Corretto**: SITE_CONFIG aggiornata con correzioni dimensionali
+- **Codice Katana**: I 4 file pronti per copy-paste su Notion
+- **Repository**: Struttura repo, download file e comandi git
 
-### Regola fondamentale
-> Il codice Katana esistente (dist/) non va toccato né refactorizzato.
-> Si interviene solo su ciò che viene esplicitamente richiesto.
+## Rigenerare dist/
 
-## Note tecniche
+Dopo aver modificato i sorgenti TS in `tool/src/app/components/katana-files/`:
 
-- In `script-js-code.ts` i template literal JS sono convertiti in concatenazione di stringhe per compatibilità col wrapper TypeScript
-- Attenzione critica all'escaping: regex `\\.` → `\.` nell'output, newline via `String.fromCharCode(10)`
-- I file in `dist/` funzionano offline (no CORS) grazie a `data.js` invece di `.json`
+```bash
+node build-dist.js
+```
+
+Questo script estrae il contenuto dai template literal TypeScript e scrive i 4 file in `dist/`.
+
+## Commit Convention
+
+- `feat(dist):` — Modifiche ai file output Katana
+- `feat(tool):` — Modifiche al dev tool React
+- `docs:` — Documentazione
