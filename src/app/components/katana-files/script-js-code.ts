@@ -33,7 +33,7 @@ function checkContrast(bgColors, styles) {
     let minRatio = 21,
         issues = [];
     bgColors.forEach((bg) => {
-        // Se tinycolor non \u00e8 caricato, fallback dummy
+        // Se tinycolor non è caricato, fallback dummy
         if (typeof tinycolor === "undefined") return { ok: true, val: 21 };
 
         const ratioText = tinycolor.readability(bg, styles.text);
@@ -411,7 +411,7 @@ window.stepZoom = function (step) {
 };
 
 /* =========================================================================
-   editCrop \u2014 MODIFICATA per supportare oz hint nel footer modale
+   editCrop — MODIFICATA per supportare oz hint nel footer modale
    ========================================================================= */
 window.editCrop = function (idx) {
     editIdx = idx;
@@ -420,7 +420,7 @@ window.editCrop = function (idx) {
     dom.modalImg.src = "";
     if (cropper) cropper.destroy();
 
-    // Hint text \u2014 aggiunto supporto oz
+    // Hint text — aggiunto supporto oz
     let hintText = spec.f
         ? STRINGS.modalHintFocus
         : spec.m === "circle"
@@ -483,7 +483,14 @@ window.editCrop = function (idx) {
 };
 
 /* =========================================================================
-   updateOverlay \u2014 RISCRITTA per supportare Area Focus (f) + Overlay Zones (oz)
+   updateOverlay — RISCRITTA per supportare Area Focus (f) + Overlay Zones (oz)
+
+   f  (Area Focus):  dove METTERE il soggetto   → verde solido #22C55E
+   oz (Overlay Zones):
+     - type "text"  (Area Testi): testo/gradient UI   → ambra dashed #F59E0B
+     - type "badge" (Area Loghi): loghi/premi         → rosso dashed #EF4444
+
+   Tutti gli stili sono inline per non dipendere dal CSS esterno.
    ========================================================================= */
 function updateOverlay(spec, w, h) {
     const box = document.querySelector(".cropper-crop-box");
@@ -504,7 +511,7 @@ function updateOverlay(spec, w, h) {
         return label;
     }
 
-    // --- AREA FOCUS (f) \u2014 Verde ---
+    // --- AREA FOCUS (f) — Verde: dove METTERE il soggetto ---
     if (spec.f) {
         const el = document.createElement("div");
         el.className = "modal-focus-overlay";
@@ -518,6 +525,7 @@ function updateOverlay(spec, w, h) {
             if (initialFocus === "center") fY += deltaH / 2;
             else if (initialFocus === "bottom") fY += deltaH;
         }
+        // Stili inline — indipendenti dal CSS esterno
         el.style.position = "absolute";
         el.style.pointerEvents = "none";
         el.style.zIndex = "50";
@@ -536,7 +544,7 @@ function updateOverlay(spec, w, h) {
         box.appendChild(el);
     }
 
-    // --- OVERLAY ZONES (oz) ---
+    // --- OVERLAY ZONES (oz): Area Testi / Area Loghi ---
     if (spec.oz && spec.oz.length > 0) {
         const palette = {
             text:  { border: "rgba(245, 158, 11, 0.90)", bg: "rgba(245, 158, 11, 0.15)", label: "rgba(245, 158, 11, 0.65)" },
@@ -582,11 +590,22 @@ window.startReplace = function (idx) {
 
 /* =========================================================================
    detectAssetFromFile(fileName, imgW, imgH)
+   Analizza nome file, dimensioni immagine e (opzionalmente) layer PSD
+   per identificare automaticamente canale, componente e variante.
+   Restituisce l'oggetto match migliore oppure null.
+   Segnali analizzati (peso decrescente):
+     - filenamePrefix (40pt)
+     - variant suffix nel nome file (15pt)
+     - asset ID nel nome file (20pt)
+     - dimensioni esatte @2x o @1x (15pt / 12pt)
+     - aspect ratio compatibile (5pt)
+     - layer PSD con nome corrispondente (8pt)
+   Soglia minima per suggerire: 40 (almeno prefix + un altro segnale)
    ========================================================================= */
 function detectAssetFromFile(fileName, imgW, imgH) {
     var base = (fileName || "")
-        .replace(/\\.(webp|png|jpg|jpeg|psd|tiff?)$/i, "")
-        .replace(/x\\d+@2x$/i, "")
+        .replace(/\.(webp|png|jpg|jpeg|psd|tiff?)$/i, "")
+        .replace(/x\d+@2x$/i, "")
         .replace(/@2x$/i, "");
     var baseLower = base.toLowerCase();
     if (!baseLower) return null;
@@ -623,6 +642,7 @@ function detectAssetFromFile(fileName, imgW, imgH) {
 
                 var fullPrefix = prefix + c.varSuffix;
 
+                // 1) Prefisso completo (prefix + variant suffix)
                 if (c.varSuffix && baseLower.indexOf(fullPrefix) === 0) {
                     var nc = baseLower[fullPrefix.length];
                     if (!nc || nc === "-") {
@@ -638,6 +658,7 @@ function detectAssetFromFile(fileName, imgW, imgH) {
                         }
                     }
                 }
+                // 2) Solo prefisso (senza variant suffix)
                 else if (baseLower.indexOf(prefix) === 0) {
                     var nc2 = baseLower[prefix.length];
                     if (!nc2 || nc2 === "-") {
@@ -654,6 +675,7 @@ function detectAssetFromFile(fileName, imgW, imgH) {
                     }
                 }
 
+                // 3) Dimensioni immagine
                 if (score > 0) {
                     var specW1 = c.asset.w;
                     var specH1 = c.asset.controlH ? c.asset.controlH.min : c.asset.h;
@@ -669,6 +691,7 @@ function detectAssetFromFile(fileName, imgW, imgH) {
                     }
                 }
 
+                // 4) Layer PSD con nomi corrispondenti
                 if (score > 0 && psdLayers.length > 0) {
                     var assetLabel = c.asset.label.toLowerCase();
                     var compLabel = comp.label.toLowerCase();
@@ -700,11 +723,13 @@ function detectAssetFromFile(fileName, imgW, imgH) {
     return best && bestScore >= 40 ? best : null;
 }
 
+/* Applica il match rilevato: switch selettori UI + slug */
 function applyDetectedMatch(match) {
     STATE.site = match.site;
     dom.site.value = match.site;
     localStorage.setItem("katana_site", match.site);
 
+    // Ricostruisci dropdown componenti per il nuovo sito
     var components = SITE_CONFIG[match.site].components;
     dom.comp.innerHTML = "";
     Object.keys(components).forEach(function(k) {
@@ -715,6 +740,7 @@ function applyDetectedMatch(match) {
     dom.comp.value = match.comp;
     STATE.comp = match.comp;
 
+    // Ricostruisci varianti per il componente rilevato
     updateVariantList();
     if (match.variant && match.variant !== "main" && dom.variant) {
         dom.variant.value = match.variant;
@@ -722,12 +748,18 @@ function applyDetectedMatch(match) {
     }
     updateSpecs();
 
+    // Imposta slug se estratto dal nome file
     if (match.slug) {
         STATE.slug = match.slug;
         dom.slug.value = match.slug;
     }
 }
 
+/* =========================================================================
+   showDetectModal(match, fileName, onConfirm, onCancel)
+   Modale custom in stile Katana brutalist per conferma auto-detection.
+   Crea il DOM dinamicamente, lo rimuove alla chiusura.
+   ========================================================================= */
 function showDetectModal(match, fileName, onConfirm, onCancel) {
     var prev = document.getElementById("detectOverlay");
     if (prev) prev.parentNode.removeChild(prev);
@@ -739,6 +771,7 @@ function showDetectModal(match, fileName, onConfirm, onCancel) {
     var dialog = document.createElement("div");
     dialog.className = "detect-dialog";
 
+    // Header
     var header = document.createElement("div");
     header.className = "detect-header";
     var hIcon = document.createElement("span");
@@ -749,6 +782,7 @@ function showDetectModal(match, fileName, onConfirm, onCancel) {
     header.appendChild(hIcon);
     header.appendChild(hTitle);
 
+    // Body
     var body = document.createElement("div");
     body.className = "detect-body";
 
@@ -772,6 +806,7 @@ function showDetectModal(match, fileName, onConfirm, onCancel) {
     if (match.varLabel) addRow(STRINGS.detectVariant, match.varLabel);
     if (match.slug) addRow(STRINGS.detectSlug, match.slug);
 
+    // Footer
     var footer = document.createElement("div");
     footer.className = "detect-footer";
 
@@ -823,6 +858,7 @@ function loadMaster(file) {
                 setTimeout(runSmartCrop, 100);
             }
 
+            // --- Smart Detection: identifica componente/variante dal file ---
             var match = detectAssetFromFile(file.name, img.width, img.height);
             if (match) {
                 var isSame = (match.site === STATE.site && match.comp === STATE.comp && match.variant === STATE.variant);
@@ -855,6 +891,7 @@ function replaceSrc(file) {
     });
 }
 
+// Generazione layout intelligente (senza Pica se necessario)
 async function runSmartCrop() {
     const assets = getActiveAssets();
     STATE.items = [];
@@ -906,6 +943,7 @@ async function runSmartCrop() {
         SITE_CONFIG[STATE.site].components[STATE.comp].label + " - " + (STATE.slug || "export") + ' <span class="icon icon-edit-slug" onclick="window.editProjectName()" title="Modifica nome">edit</span>';
 }
 
+// Renderizza le card nella griglia
 function renderGrid() {
     dom.grid.innerHTML = "";
     STATE.items.forEach((item, idx) => {
@@ -951,17 +989,30 @@ function renderGrid() {
             const ctx = cvs.getContext("2d");
             ctx.drawImage(
                 item.customImg || STATE.img,
-                item.crop.x, item.crop.y, item.crop.width, item.crop.height,
-                0, 0, item.currentW, item.currentH
+                item.crop.x,
+                item.crop.y,
+                item.crop.width,
+                item.crop.height,
+                0,
+                0,
+                item.currentW,
+                item.currentH
             );
             if (item.maskCircle) {
                 ctx.globalCompositeOperation = "destination-in";
                 ctx.beginPath();
-                ctx.arc(item.currentW / 2, item.currentH / 2, Math.min(item.currentW, item.currentH) / 2, 0, 2 * Math.PI);
+                ctx.arc(
+                    item.currentW / 2,
+                    item.currentH / 2,
+                    Math.min(item.currentW, item.currentH) / 2,
+                    0,
+                    2 * Math.PI
+                );
                 ctx.fill();
                 ctx.globalCompositeOperation = "source-over";
             }
 
+            /* --- oz info nella meta-box (aggiunta) --- */
             var ozHtml = (item.assetSpec.oz && item.assetSpec.oz.length > 0)
                 ? '<div class="meta-item"><span class="meta-label">' + STRINGS.overlayZones + '</span><span class="meta-value">' + item.assetSpec.oz.map((z) => z.l).join(", ") + '</span></div>'
                 : "";
@@ -990,6 +1041,17 @@ function renderGrid() {
     });
 }
 
+// --- FUNZIONI DI EXPORT (NATIVE, NO PICA) ---
+
+/* =========================================================================
+   generatePsd(item)
+   Genera un buffer PSD con 3 layer:
+   1. "Overlay"   (nascosto) — Focus area + Overlay Zones
+   2. "Ritaglio"  (visibile) — Immagine intera riposizionata (non tagliata),
+      la crop area coincide con il canvas PSD
+   3. "Sorgente"  (nascosto) — Immagine originale a risoluzione piena 1:1
+   Richiede ag-psd caricato come modulo (window.writePsd).
+   ========================================================================= */
 async function generatePsd(item) {
     if (typeof window.writePsd !== "function") return null;
     var spec = item.assetSpec;
@@ -998,6 +1060,10 @@ async function generatePsd(item) {
     var s = spec.d ? 2 : 1;
     var src = item.customImg || STATE.img;
 
+    // --- Layer: Ritaglio (immagine intera riposizionata, qualità sorgente) ---
+    // Scala: il rettangolo di crop (in pixel sorgente) deve mappare esattamente
+    // sul canvas PSD (w x h). L'immagine completa viene scalata e posizionata
+    // in modo che la parte fuori-crop sporga oltre i bordi del canvas.
     var sx = w / item.crop.width;
     var sy = h / item.crop.height;
     var layerW = Math.round(src.width * sx);
@@ -1016,6 +1082,7 @@ async function generatePsd(item) {
     var cropLeft = layerLeft;
     var cropTop = layerTop;
 
+    // Per maschera circolare: layer classico ritagliato (circle mask non supporta offset)
     if (item.maskCircle) {
         var mcCvs = document.createElement("canvas");
         mcCvs.width = w; mcCvs.height = h;
@@ -1035,17 +1102,20 @@ async function generatePsd(item) {
         cropTop = 0;
     }
 
+    // --- Layer: Sorgente (nascosto, risoluzione originale 1:1) ---
     var srcCvs = document.createElement("canvas");
     srcCvs.width = src.width;
     srcCvs.height = src.height;
     var srcCtx = srcCvs.getContext("2d");
     srcCtx.drawImage(src, 0, 0);
 
+    // --- Layer: Overlay (focus + oz, nascosto) ---
     var ozCvs = document.createElement("canvas");
     ozCvs.width = w; ozCvs.height = h;
     var ozCtx = ozCvs.getContext("2d");
     var hasOverlay = false;
 
+    // Area Focus — verde #22C55E
     if (spec.f) {
         hasOverlay = true;
         var fY = spec.f.y, fH = spec.f.h;
@@ -1067,6 +1137,7 @@ async function generatePsd(item) {
         ozCtx.fillText("Area Focus", (spec.f.x + 6) * s, (fY + 16) * s);
     }
 
+    // Overlay Zones — text: ambra #F59E0B, badge: rosso #EF4444
     if (spec.oz && spec.oz.length > 0) {
         hasOverlay = true;
         var pal = {
@@ -1088,6 +1159,7 @@ async function generatePsd(item) {
         });
     }
 
+    // Costruzione PSD: layer dal top al bottom (Photoshop order)
     var children = [];
     if (hasOverlay) {
         children.push({ name: "Overlay", canvas: ozCvs, hidden: true });
@@ -1095,6 +1167,7 @@ async function generatePsd(item) {
     children.push({ name: "Ritaglio", canvas: cropCvs, left: cropLeft, top: cropTop });
     children.push({ name: "Sorgente", canvas: srcCvs, left: 0, top: 0, hidden: true });
 
+    // Composite (thumbnail per Finder/Explorer): immagine croppata alle dimensioni canvas
     var compCvs = document.createElement("canvas");
     compCvs.width = w; compCvs.height = h;
     var compCtx = compCvs.getContext("2d");
@@ -1150,18 +1223,26 @@ async function downloadZip() {
             const w = item.assetSpec.d ? item.currentW * 2 : item.currentW;
             const h = item.assetSpec.d ? item.currentH * 2 : item.currentH;
 
+            // Creazione canvas finale (ridimensionamento nativo)
             const canvas = document.createElement("canvas");
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext("2d");
 
+            // Abilita interpolazione di qualità del browser
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
             ctx.drawImage(
                 item.customImg || STATE.img,
-                item.crop.x, item.crop.y, item.crop.width, item.crop.height,
-                0, 0, w, h
+                item.crop.x,
+                item.crop.y,
+                item.crop.width,
+                item.crop.height,
+                0,
+                0,
+                w,
+                h
             );
 
             if (item.maskCircle) {
@@ -1178,10 +1259,11 @@ async function downloadZip() {
                 folder.file(fname, await compressToTarget(canvas, item.assetSpec.targetKB || 200));
             }
 
+            // Generazione PSD
             if (STATE.exportPsd) {
                 const psdBuf = await generatePsd(item);
                 if (psdBuf) {
-                    folder.file(fname.replace(/\\.webp$/, ".psd"), psdBuf);
+                    folder.file(fname.replace(/\.webp$/, ".psd"), psdBuf);
                 }
             }
         }
@@ -1192,6 +1274,7 @@ async function downloadZip() {
     });
 }
 
+// Compressione Nativa (senza Pica)
 function canvasToBlob(canvas, quality) {
     return new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
 }
@@ -1206,6 +1289,7 @@ async function compressToTarget(canvas, maxKB) {
     return blob;
 }
 
+// Caricamento libreria PSD (lazy, on-demand via dynamic import)
 async function loadPsdLib() {
     if (window.writePsd && window.readPsd) return true;
     try {
@@ -1227,6 +1311,7 @@ async function loadPsdLib() {
     }
 }
 
+// Helper: converte un File (immagine o PSD) in data-URL utilizzabile da <img>
 function fileToDataUrl(file, callback) {
     var isPsd = file.name && file.name.toLowerCase().endsWith(".psd");
     window._lastPsdInfo = null;
@@ -1237,6 +1322,7 @@ function fileToDataUrl(file, callback) {
                 try {
                     var psd = window.readPsd(new Uint8Array(buf));
                     if (psd.canvas) {
+                        // Memorizza info layer PSD per smart detection
                         window._lastPsdInfo = {
                             layers: (psd.children || []).map(function(c) { return c.name || ""; }),
                             width: psd.width,

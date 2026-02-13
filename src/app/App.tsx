@@ -17,6 +17,7 @@ import {
   BookOpen,
   ArrowRight,
   Code2,
+  FolderGit2,
 } from "lucide-react";
 import {
   analysisEntries,
@@ -27,6 +28,7 @@ import {
 import { ComparisonCard } from "./components/ComparisonCard";
 import { KatanaCodeTab } from "./components/KatanaCodeTab";
 import { KatanaPreviewTab } from "./components/KatanaPreviewTab";
+import { KatanaRepoTab } from "./components/KatanaRepoTab";
 
 type FilterType = "all" | Status;
 type TabType =
@@ -34,7 +36,8 @@ type TabType =
   | "schema"
   | "preview"
   | "json"
-  | "code";
+  | "code"
+  | "repo";
 
 const filterOptions: {
   value: FilterType;
@@ -283,7 +286,7 @@ function SchemaTab() {
             className="text-slate-500"
             style={{ fontSize: "11px" }}
           >
-            Definizione propriet\u00e0
+            Definizione proprietà
           </span>
         </div>
         <pre
@@ -318,8 +321,8 @@ function SchemaTab() {
   h: 400,
   d: false,
   fl: "Destra",
-  f:  { x: 936, y: 0, w: 552, h: 400 },     // \u2190 soggetto QUI
-  oz: [                                        // \u2190 soggetto NON qui
+  f:  { x: 936, y: 0, w: 552, h: 400 },     // ← soggetto QUI
+  oz: [                                        // ← soggetto NON qui
     { t: "text",  l: "Area Testi", x: 338,  y: 0,   w: 598, h: 400 },
     { t: "badge", l: "Area Loghi",  x: 1205, y: 272, w: 408, h: 108 }
   ],
@@ -493,7 +496,7 @@ function SchemaTab() {
             <span className="text-slate-400 mt-0.5">1.</span>
             <span className="text-slate-700">
               <strong>Retrocompatibile:</strong> <code>oz</code>{" "}
-              \u00e8 opzionale. Gli asset senza overlay continuano a
+              è opzionale. Gli asset senza overlay continuano a
               funzionare esattamente come prima.
             </span>
           </div>
@@ -526,7 +529,7 @@ function SchemaTab() {
             <span className="text-slate-400 mt-0.5">5.</span>
             <span className="text-slate-700">
               <strong>Estensibile:</strong> Il campo{" "}
-              <code>t</code> pu\u00f2 ospitare futuri tipi (es.
+              <code>t</code> può ospitare futuri tipi (es.
               "cta", "nav", "watermark") senza cambiare lo
               schema.
             </span>
@@ -635,6 +638,11 @@ export default function App() {
       id: "code",
       label: "Codice Katana",
       icon: <Code2 className="w-3.5 h-3.5" />,
+    },
+    {
+      id: "repo",
+      label: "Repo",
+      icon: <FolderGit2 className="w-3.5 h-3.5" />,
     },
   ];
 
@@ -929,6 +937,8 @@ export default function App() {
         )}
 
         {activeTab === "code" && <KatanaCodeTab />}
+
+        {activeTab === "repo" && <KatanaRepoTab />}
       </main>
 
       {/* Footer */}

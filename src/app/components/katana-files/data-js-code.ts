@@ -26,7 +26,7 @@ const STRINGS = {
     processing: "Elaborazione...",
     zipping: "Creazione pacchetto",
     assetAnalysis: "Analisi asset",
-    safariAlert: "Safari non \u00e8 preciso. Dacci un taglio e usa Chrome.",
+    safariAlert: "Safari non è preciso. Dacci un taglio e usa Chrome.",
     newProject: "Nuovo Progetto",
     projectName: "Nome Progetto",
     exampleSlug: "es. promo-giappone",

@@ -35,7 +35,7 @@ export const styleCssCode = `/* ================================================
     /* GEOMETRY & EFFECTS */
     --radius-base: 0px; /* Brutalist design choice */
     --radius-preview-btn: 50px;
-    --shadow-solid: 6px 6px 0px rgba(0, 0, 0, 0.08); /* Ombra solida stile retr\u00f2 */
+    --shadow-solid: 6px 6px 0px rgba(0, 0, 0, 0.08); /* Ombra solida stile retrò */
     --shadow-focus: 3px 3px 0 var(--accent);
 }
 
@@ -660,7 +660,6 @@ h5,
     transform: translate(-1px, -1px);
     box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
     background: #d00000;
-}
 
 /* PSD Export Toggle Row */
 .psd-toggle-row {
@@ -761,19 +760,19 @@ h5,
 }
 
 /* --------------------------------------------------------------------------
-   OVERLAY ZONES \u2014 Area Focus (f) + Overlay Zones (oz)
+   OVERLAY ZONES — Area Focus (f) + Overlay Zones (oz)
    --------------------------------------------------------------------------
    Palette colori:
-   - Area Focus  \u2192 Verde  #22C55E \u2014 bordo solido 2px  \u2014 dove METTERE il soggetto
-   - Area Testi  \u2192 Ambra  #F59E0B \u2014 bordo dashed 2px  \u2014 testo/gradient UI (evitare)
-   - Area Loghi  \u2192 Rosso  #EF4444 \u2014 bordo dashed 2px  \u2014 loghi/premi (evitare)
+   - Area Focus  → Verde  #22C55E — bordo solido 2px  — dove METTERE il soggetto
+   - Area Testi  → Ambra  #F59E0B — bordo dashed 2px  — testo/gradient UI (evitare)
+   - Area Loghi  → Rosso  #EF4444 — bordo dashed 2px  — loghi/premi (evitare)
 
    NOTA: Gli stili critici degli overlay sono anche inline nel JS (updateOverlay),
    quindi il rendering funziona anche senza questo CSS. Questo file serve come
    override/fallback e per gli hint della legenda nel footer del modal.
    -------------------------------------------------------------------------- */
 
-/* --- Area Focus (f) \u2014 Verde --- */
+/* --- Area Focus (f) — Verde --- */
 .modal-focus-overlay {
     position: absolute;
     pointer-events: none;
@@ -787,7 +786,7 @@ h5,
     padding: 4px;
 }
 
-/* --- Overlay Zones (oz) \u2014 base --- */
+/* --- Overlay Zones (oz) — base --- */
 .modal-oz-overlay {
     position: absolute;
     pointer-events: none;
@@ -799,13 +798,13 @@ h5,
     box-sizing: border-box;
 }
 
-/* Tipo "text": Area Testi \u2014 Ambra */
+/* Tipo "text": Area Testi — Ambra */
 .modal-oz-text {
     border: 2px dashed rgba(245, 158, 11, 0.90);
     background: rgba(245, 158, 11, 0.15);
 }
 
-/* Tipo "badge": Area Loghi \u2014 Rosso */
+/* Tipo "badge": Area Loghi — Rosso */
 .modal-oz-badge {
     border: 2px dashed rgba(239, 68, 68, 0.90);
     background: rgba(239, 68, 68, 0.15);

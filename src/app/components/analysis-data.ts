@@ -195,7 +195,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configH: 300,
     configFocus: null,
     status: "ok",
-    changes: ["Mobile identico a Display-S (768\u00d7300)"],
+    changes: ["Mobile identico a Display-S (768×300)"],
   },
   {
     figmaFrame: "CorpModuleIntroPhoto-M-NomeFileALTO",
@@ -231,7 +231,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "h: 400 \u2192 470 (variante ALTO, +70px)",
+      "h: 400 → 470 (variante ALTO, +70px)",
       "Aggiungere f: {x:446, y:0, w:418, h:470}",
       "Aggiungere oz: text Area Testi {x:122, y:0, w:324, h:470}",
       "Aggiungere oz: badge Area Loghi {x:495, y:358, w:320, h:92}",
@@ -271,7 +271,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "h: 400 \u2192 470 (variante ALTO, +70px)",
+      "h: 400 → 470 (variante ALTO, +70px)",
       "Aggiungere f: {x:936, y:0, w:552, h:470}",
       "Aggiungere oz: text Area Testi {x:338, y:0, w:598, h:470}",
       "Aggiungere oz: badge Area Loghi {x:1205, y:307, w:408, h:108}",
@@ -297,7 +297,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configH: 309,
     configFocus: null,
     status: "mismatch",
-    changes: ["w: 575 \u2192 535 (\u221240px)"],
+    changes: ["w: 575 → 535 (−40px)"],
   },
   {
     figmaFrame: "CorpModuleIntroBox-S-nome (Tablet)",
@@ -359,7 +359,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "w: 2000 \u2192 1728 (\u2212272px)",
+      "w: 2000 → 1728 (−272px)",
       "Aggiungere f: {x:630, y:79, w:469, h:242}",
       'Aggiungere fl: "Centro"',
     ],
@@ -385,7 +385,7 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "w: 700 \u2192 864 (+164px) \u2014 verificare se il frame rappresenta col-6 o altro breakpoint",
+      "w: 700 → 864 (+164px) — verificare se il frame rappresenta col-6 o altro breakpoint",
       "Aggiungere f: {x:265, y:0, w:334, h:400}",
     ],
   },
@@ -454,8 +454,8 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "w: 800 \u2192 400 (dimezzato)",
-      "h: 1200 \u2192 600 (dimezzato)",
+      "w: 800 → 400 (dimezzato)",
+      "h: 1200 → 600 (dimezzato)",
       "Aggiungere f: {x:0, y:0, w:400, h:452}",
       'Aggiungere fl: "Alto"',
     ],
@@ -477,8 +477,8 @@ export const analysisEntries: AnalysisEntry[] = [
     configFocus: null,
     status: "mismatch",
     changes: [
-      "w: 800 \u2192 400 (dimezzato)",
-      "h: 1000 \u2192 500 (dimezzato)",
+      "w: 800 → 400 (dimezzato)",
+      "h: 1000 → 500 (dimezzato)",
       "Aggiungere f: {x:0, y:0, w:400, h:341}",
       'Aggiungere fl: "Alto"',
     ],
@@ -553,14 +553,14 @@ export const analysisEntries: AnalysisEntry[] = [
     changes: [
       "Nuovo componente: Box Rack Badge Loghi",
       "Asset unica: w:604, h:139",
-      "Contiene 2 cerchi badge: 129\u00d7129px ciascuno",
+      "Contiene 2 cerchi badge: 129×129px ciascuno",
     ],
   },
 ];
 
 // =============================================
 // CORRECTED SITE_CONFIG (solo sezione corporate)
-// Include la nuova propriet\u00e0 oz (overlay zones)
+// Include la nuova proprietà oz (overlay zones)
 // =============================================
 export const correctedCorporateConfig = {
   corporate: {
