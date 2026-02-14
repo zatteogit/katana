@@ -79,10 +79,7 @@ const STRINGS = {
     detectComponent: "Componente",
     detectVariant: "Variante",
     detectSlug: "Progetto",
-    detectConfirm: "Vuoi selezionare automaticamente questo componente?",
-    detectBtnConfirm: "Seleziona",
-    detectBtnCancel: "Ignora",
-    detectFileName: "File"
+    detectConfirm: "Vuoi selezionare automaticamente questo componente?"
 };
 
 /* -------------------------------------------------------------------------- */
