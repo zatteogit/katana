@@ -10,7 +10,6 @@ export const styleCssCode = `/* ================================================
    7. SVG Color Picker Tools
    8. Modal Editor (CropperJS Overrides)
    9. Utilities & Responsive
-   10. Detect Modal (Smart Asset Recognition)
    ========================================================================== */
 
 /* ==========================================================================
@@ -660,6 +659,7 @@ h5,
     transform: translate(-1px, -1px);
     box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
     background: #d00000;
+}
 
 /* PSD Export Toggle Row */
 .psd-toggle-row {
@@ -989,137 +989,4 @@ h5,
     }
 }
 
-/* ==========================================================================
-   10. DETECT MODAL (Smart Asset Recognition)
-   Modale custom per conferma auto-riconoscimento asset.
-   Stile brutalist coerente con il design system Katana.
-   ========================================================================== */
-.detect-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: rgba(0, 0, 0, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: detectFadeIn 0.2s ease;
-}
-@keyframes detectFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-@keyframes detectSlideIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.detect-dialog {
-    background: var(--surface, #ffffff);
-    border: 2px solid var(--primary, #1a1a1a);
-    box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.12);
-    width: 420px;
-    max-width: calc(100vw - 32px);
-    animation: detectSlideIn 0.25s ease;
-    font-family: "Inter", sans-serif;
-}
-.detect-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border-color, #e0e0e0);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.detect-header .icon {
-    font-size: 22px;
-    color: var(--accent, #e63946);
-}
-.detect-header h5 {
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-main, #111);
-}
-.detect-body {
-    padding: 20px 24px;
-}
-.detect-row {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 6px 0;
-}
-.detect-row:not(:last-child) {
-    border-bottom: 1px dashed var(--border-color, #e0e0e0);
-}
-.detect-label {
-    flex-shrink: 0;
-    width: 100px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-muted, #888);
-}
-.detect-value {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-main, #111);
-    word-break: break-word;
-}
-.detect-value .detect-pill {
-    display: inline-block;
-    background: var(--primary, #1a1a1a);
-    color: #fff;
-    padding: 2px 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    font-family: monospace;
-    letter-spacing: 0.5px;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-.detect-footer {
-    padding: 16px 24px 20px;
-    border-top: 1px solid var(--border-color, #e0e0e0);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-}
-.detect-footer .detect-hint {
-    flex: 1;
-    font-size: 0.72rem;
-    color: var(--text-muted, #888);
-    line-height: 1.4;
-}
-.detect-btn {
-    padding: 10px 24px;
-    font-weight: 700;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-family: "Inter", sans-serif;
-}
-.detect-btn-cancel {
-    background: #f0f0f0;
-    color: var(--text-main, #111);
-    border: 1px solid transparent;
-}
-.detect-btn-cancel:hover {
-    background: #e0e0e0;
-    color: #000;
-}
-.detect-btn-confirm {
-    background: var(--accent, #e63946);
-    color: #fff;
-}
-.detect-btn-confirm:hover {
-    background: #000;
-    color: #fff;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}`;
+`;
