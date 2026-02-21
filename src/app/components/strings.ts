@@ -1,114 +1,586 @@
-<!DOCTYPE html>
-<html>
+/**
+ * Bento — Centralized UI Strings v1.0
+ * ====================================
+ * Tutte le stringhe visibili all'utente vivono qui.
+ * I consumer importano `S` e usano `S.CHIAVE`.
+ * Il testo e' in natural case; il CSS (`textTransform: "uppercase"`)
+ * gestisce la resa visuale brutalist.
+ *
+ * Convenzione naming:
+ *   APP_*       → branding globale
+ *   NAV_*       → navigazione e link
+ *   LAUNCHER_*  → pagina Launcher
+ *   KATANA_*    → scope Katana
+ *   NIGIRI_*    → scope Nigiri
+ *   DEVTOOLS_*  → pagina Dev Tools
+ *   DS_*        → pagina Design System
+ *   SAFARI_*    → warning browser
+ *   FOOTER_*    → footer condiviso
+ *   COMMON_*    → label generiche riusabili
+ */
 
-<body>
-  <script>
-    window.messagePort = null
+export const S = {
+  /* ── App branding ──────────────────────────────────────────────── */
+  APP_NAME: "Bento",
+  APP_KANJI: "お弁当",
+  APP_SUBTITLE: "Digital Media Internal Tools",
+  APP_TEAM: "Digital Media — Comunicazione",
 
-    const allowedOrigins = [
-      'https://figma-gov.com',
-      'https://www.figma.com',
-      'https://staging.figma.com',
-      'https://devenv01.figma.engineering',
-      'https://local.figma.engineering:8443',
-      'http://localhost:9000',
-    ]
+  /* ── Navigation ────────────────────────────────────────────────── */
+  NAV_BACK_LAUNCHER: "Torna al Launcher",
+  NAV_DESIGN_SYSTEM: "DS",
+  NAV_DEV_TOOLS: "Dev Tools",
+  NAV_SETTINGS: "Settings",
 
-    const allowedOriginPatterns = [
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems:8443$/,
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems$/,
-    ]
+  /* ── Settings (#173) ─────────────────────────────────────────── */
+  SETTINGS_TITLE: "Settings",
+  SETTINGS_SUBTITLE: "Gestione App e Preferenze",
 
-    function isAllowedOrigin(origin) {
-      return allowedOrigins.includes(origin) || allowedOriginPatterns.some(p => p.test(origin))
-    }
+  /* ── Settings — Role profiling (#59 feat-015) ───────────────── */
+  SETTINGS_ROLE_DIALOG_TITLE: "Applica profilo?",
+  SETTINGS_ROLE_DIALOG_DESC: (role: string) =>
+    `Vuoi attivare le app raccomandate per il ruolo "${role}"? Le app non incluse verranno disabilitate.`,
+  SETTINGS_ROLE_APPLY: "Applica",
+  SETTINGS_ROLE_CANCEL: "Annulla",
+  SETTINGS_ROLE_APPLIED: (role: string) => `Profilo ${role} applicato`,
+  SETTINGS_ROLE_RECOMMENDED: "Consigliata",
+  SETTINGS_ROLE_NOT_RECOMMENDED: "Non inclusa",
+  SETTINGS_ROLE_APPLY_BTN: "Applica raccomandazioni ruolo",
+  SETTINGS_ROLE_DEVTOOLS_NOTICE: "DevTools non è disponibile per questo ruolo. Passa a Developer per accedere.",
+  SETTINGS_ROLE_CURRENT: "Ruolo attuale",
 
-    window.addEventListener('message', (e) => {
-      function sendMessage(data) {
-        if (window.messagePort) {
-          window.messagePort.postMessage({ data })
-        }
-      }
+  /* ── Launcher ─────────────────────────────────────────────── */
+  // LAUNCHER_KATANA_NOTICE_* strings removed — notice box eliminated
 
-      if (isAllowedOrigin(e.origin)) {
-        if (e.data.type === 'iframe-init') {
-          window.messagePort = e.ports[0]
-          window.__PREVIEW_IFRAME_INITIAL_OPTIONS__ = e.data.previewIframeInitialOptions
+  /* ── Katana ────────────────────────────────────────────────────── */
+  KATANA_TITLE: "Katana",
+  KATANA_KANJI: "カタナ",
+  KATANA_VERSION: "v4.0-beta3",
+  KATANA_SUBTITLE: "Ritaglio e export asset immagine multi-breakpoint",
+  KATANA_DESCRIPTION:
+    "Carica un'immagine sorgente, seleziona il canale e il componente, visualizza il crop con focus area e overlay zones, ed esporta tutti i breakpoint in un click. Supporta @1x/@2x e ottimizzazione peso.",
+  KATANA_FEAT_CROP: "Crop intelligente",
+  KATANA_FEAT_BREAKPOINT: "Multi-breakpoint",
+  KATANA_FEAT_EXPORT: "Export batch",
+  KATANA_FEAT_FOCUS: "Focus & overlay",
+  /* Workspace UI */
+  KATANA_SLUG_CONFIRM: "Conferma",
+  KATANA_SLUG_CANCEL: "Annulla",
+  KATANA_SLUG_EDIT: "Modifica nome",
+  KATANA_SLUG_PLACEHOLDER: "nome-pagina",
+  KATANA_SLUG_FALLBACK: "Nome",
+  /* Export toasts */
+  KATANA_ZIP_OK: (slug: string) => `ZIP scaricato · ${slug || "Nome"}`,
+  KATANA_ZIP_DESC: (count: number) => `${count} asset esportati`,
+  KATANA_ZIP_FAIL: "Errore durante il download ZIP",
+  KATANA_ZIP_FALLBACK_TITLE: "Sorgenti originali non disponibili",
+  KATANA_ZIP_FALLBACK_DESC: (count: number, labels: string) =>
+    `${count} file in asset/ sono stati salvati come PNG fallback (${labels}). Per preservare i sorgenti originali, ricarica i file prima dell'export.`,
+  /* PSD toggle */
+  KATANA_PSD_READY: "PSD pronto",
+  KATANA_PSD_READY_DESC: "Libreria ag-psd caricata con successo",
+  KATANA_PSD_FAIL: "Libreria PSD non disponibile",
+  KATANA_PSD_TOGGLE: "Includi PSD con layer (sorgente + overlay)",
+  KATANA_PSD_LOADING: "Caricamento libreria PSD...",
+  /* Export progress */
+  KATANA_PROGRESS_PACK: "Creazione pacchetto...",
+  KATANA_PROGRESS_SAVE: "Salvataggio sorgenti...",
+  KATANA_PROGRESS_PSD: "Generazione PSD...",
+  /* Setup fallbacks */
+  KATANA_DROP_HERE: "Rilascia per caricare",
+  KATANA_SUPPORTED_FORMATS: "formati supportati: jpg, png, psd",
+  KATANA_SOURCE_SPEC: "Sorgenti",
+  KATANA_SOURCE_DIM_MIN: "Dimensioni",
+  KATANA_SOURCE_SAFE: "Area sicura",
+  KATANA_SOURCE_SUBJECT: "Zona soggetto",
+  KATANA_SOURCE_REC: "Consigliato",
+  KATANA_SOURCE_DIM: "Dimensioni",
+  KATANA_SOURCE_SINGLE: "Sorgenti",
+  KATANA_SOURCE_ART_DIR: "Art direction consigliata",
+  KATANA_SOURCE_ART_HINT: "Differenza significativa tra breakpoint. Valuta immagini separate per mobile e desktop, o soggetto nella zona sicura con sfondo espandibile.",
+  KATANA_DL_BASE_ZIP: "Scarica basi PSD",
+  KATANA_DL_BASE_ZIP_BUSY: "Generazione…",
+  KATANA_DL_BASE_PSD: "Scarica PSD",
+  KATANA_COPY_FIGMA: "Copia in Figma",
+  KATANA_COPIED_FIGMA: "Layout copiato negli appunti — incolla in Figma",
+  KATANA_COPY_FIGMA_FAIL: "Errore nella copia negli appunti",
+  KATANA_GO_TO_EDITOR: "O vai direttamente all'editor",
+  KATANA_BACK_NIGIRI: "Torna a Nigiri",
+  KATANA_FORMAT_UNSUPPORTED: "Formato immagine non supportato.",
 
-          sendMessage({
-            method: 'status',
-            state: 'init-received',
-            isReady: false
-          })
+  /* Φ1 — Clipboard paste (feat-004) */
+  KATANA_PASTE_OK: "Immagine incollata dalla clipboard",
+  KATANA_PASTE_FAIL: "Nessuna immagine nella clipboard",
+  KATANA_PASTE_BLOCKED: "Accesso clipboard non consentito dal browser",
+  /* Φ1 — Multi-upload (feat-005) */
+  KATANA_MULTI_ASSIGNED: (count: number) =>
+    `${count} file assegnati automaticamente ai breakpoint corrispondenti`,
+  KATANA_MULTI_UNMATCHED: (count: number) =>
+    `${count} file non corrispondono a nessun breakpoint e sono stati ignorati`,
+  /* Φ1 — Per-card drop zone (feat-003) */
+  KATANA_CARD_DROP_HINT: "Trascina per sostituire",
+  KATANA_CARD_EMPTY_HINT: "Incolla o trascina un'immagine",
+  KATANA_CARD_LOAD: "Carica",
+  KATANA_OPEN_MIXOLOGY: "Genera con Mixology",
+  /* Φ6 — Template Wizard (feat-007) */
+  KATANA_TPL_WIZARD_TITLE: "Template Wizard",
+  KATANA_TPL_WIZARD_SUBTITLE: "Crea un profilo di ritaglio personalizzato",
+  KATANA_TPL_MANAGE: "Gestisci template",
+  KATANA_TPL_NEW: "Nuovo template",
+  KATANA_TPL_IMPORT: "Importa JSON",
+  KATANA_TPL_EXPORT: "Esporta JSON",
+  KATANA_TPL_EXPORT_ALL: "Esporta tutti",
+  KATANA_TPL_DELETE: "Elimina",
+  KATANA_TPL_DELETE_CONFIRM: "Eliminare il template? L'operazione non è reversibile.",
+  KATANA_TPL_EDIT: "Modifica",
+  KATANA_TPL_DUPLICATE: "Duplica",
+  KATANA_TPL_NAME: "Nome template",
+  KATANA_TPL_NAME_HINT: "Es. Landing Promo Natale",
+  KATANA_TPL_NOTES: "Note (opzionali)",
+  KATANA_TPL_ADD_COMPONENT: "Aggiungi componente",
+  KATANA_TPL_COMPONENT_KEY: "Chiave componente",
+  KATANA_TPL_COMPONENT_LABEL: "Label componente",
+  KATANA_TPL_COMPONENT_PREFIX: "Prefisso filename (opz.)",
+  KATANA_TPL_USE_VARIANTS: "Usa varianti",
+  KATANA_TPL_ADD_VARIANT: "Aggiungi variante",
+  KATANA_TPL_VARIANT_ID: "ID variante",
+  KATANA_TPL_VARIANT_LABEL: "Label variante",
+  KATANA_TPL_ADD_ASSET: "Aggiungi asset",
+  KATANA_TPL_ASSET_LABEL: "Label",
+  KATANA_TPL_ASSET_WIDTH: "Larghezza (px)",
+  KATANA_TPL_ASSET_HEIGHT: "Altezza (px)",
+  KATANA_TPL_ASSET_RETINA: "@2x retina",
+  KATANA_TPL_PRESET: "Applica preset breakpoint",
+  KATANA_TPL_SAVE: "Salva template",
+  KATANA_TPL_CANCEL: "Annulla",
+  KATANA_TPL_SAVED: "Template salvato con successo",
+  KATANA_TPL_IMPORTED: (count: number) => `${count} template importati`,
+  KATANA_TPL_IMPORT_ERROR: "Errore nell'importazione JSON",
+  KATANA_TPL_VALIDATION_ERROR: "Errori di validazione",
+  KATANA_TPL_EMPTY: "Nessun template custom — usa il wizard per crearne uno",
+  KATANA_TPL_BUILTIN_BADGE: "Built-in",
+  KATANA_TPL_CUSTOM_BADGE: "Custom",
+  KATANA_TPL_STYLE_DEFAULTS: "Colori default (light / dark)",
+  KATANA_TPL_STEP_INFO: "Info template",
+  KATANA_TPL_STEP_COMPONENTS: "Componenti",
+  KATANA_TPL_STEP_REVIEW: "Riepilogo",
 
-          if (e.data.initScriptBlob) {
-            import(URL.createObjectURL(e.data.initScriptBlob))
-          } else {
-            const script = document.createElement('script')
+  /* ── Nigiri ────────────────────────────────────────────────────── */
+  NIGIRI_TITLE: "Nigiri",
+  NIGIRI_KANJI: "握り",
+  NIGIRI_VERSION: "v1.0-beta2",
+  NIGIRI_TAG: "Production Hub",
+  NIGIRI_SUBTITLE: "A fette come un backlog — Centro controllo produzione immagini",
+  NIGIRI_DESCRIPTION:
+    "Gestisce l'intero ciclo di produzione: carica xlsx, auto-rileva componenti, genera prompt AI (GPT/DALL-E 3, Nano Banana Pro), traccia progresso con dashboard real-time e grafici, calcola deadline, sync intelligente solo voci lavorate, batch export.",
+  NIGIRI_FEAT_XLSX: "Load xlsx",
+  NIGIRI_FEAT_PROMPT: "Batch prompt AI",
+  NIGIRI_FEAT_CHARTS: "Charts & stats",
+  NIGIRI_FEAT_SYNC: "Smart sync",
 
-            script.onload = async () => {
-              function sendReady() {
-                sendMessage({
-                  method: 'status',
-                  state: 'ready',
-                  isReady: true
-                })
-              }
+  /* ── Dev Tools ─────────────────────────────────────────────────── */
+  DEVTOOLS_TITLE: "Bento Dev Tools",
+  DEVTOOLS_TAB_PREVIEW: "Preview",
+  DEVTOOLS_TAB_CODE: "Codice",
+  DEVTOOLS_TAB_DOWNLOADS: "Downloads",
+  DEVTOOLS_TAB_ISSUES: "Issues",
+  DEVTOOLS_TAB_REGRESSION: "DS Test",
+  DEVTOOLS_TAB_FLAGS: "Flags",
+  DEVTOOLS_SCOPE_KATANA: "Katana",
+  DEVTOOLS_SCOPE_NIGIRI: "Nigiri",
+  DEVTOOLS_STABLE_LABEL: "v3.0 Stable",
+  DEVTOOLS_DEV_LABEL: "v4.0 Beta",
+  DEVTOOLS_STABLE_TITLE:
+    "Stable — Baseline v3.0 verificata (freeze 2026-02-14). Clicca per passare a Beta.",
+  DEVTOOLS_DEV_TITLE:
+    "Beta — Diagnostica + preview-inject attivi. Clicca per tornare a Stable (baseline).",
+  DEVTOOLS_NIGIRI_VERSION: "v1.0 Beta 2",
+  DEVTOOLS_NIGIRI_TITLE: "Nigiri — versione beta (v1.0-beta2).",
 
-              if (window.__iframeScriptExecuted__) {
-                sendReady()
-                return
-              }
+  /* ── Safari warning ────────────────────────────────────────────── */
+  SAFARI_TITLE: "Safari rilevato",
+  SAFARI_BADGE: "Compatibilita'",
+  SAFARI_BODY:
+    "Katana utilizza API Canvas avanzate, gestione Blob/File e iframe cross-origin che su Safari possono presentare limitazioni. Per la migliore esperienza:",
+  SAFARI_CHROME: "Chrome",
+  SAFARI_FIREFOX: "Firefox",
+  SAFARI_EDGE: "Edge",
 
-              let executeInterval = null
-              let timeout = null
+  /* ── Design System page ────────────────────────────────────────── */
+  DS_PAGE_TITLE: "Design System",
+  DS_PAGE_SUBTITLE: "Bento Token Reference · Dual Mode · UI Catalog",
+  DS_IMPORT_LABEL: "Import",
+  DS_DARK_MODE_TITLE: "Dark Chrome",
+  DS_DARK_MODE_SUBTITLE: "Palette per Bento Dev Tools, Code Tab, Downloads Tab",
+  DS_LIGHT_MODE_TITLE: "Light Brutalist",
+  DS_LIGHT_MODE_SUBTITLE: "Palette per Launcher (/) e Nigiri (/nigiri)",
+  DS_COMPONENT_TOKENS_TITLE: "Component Tokens",
+  DS_COMPONENT_TOKENS_SUBTITLE:
+    "Token specializzati per ComparisonCard e KatanaRepoTab (DevTools, light context)",
+  DS_REGRESSION_TITLE: "Regression Test Suite",
 
-              const timeoutPromise = new Promise((resolve) => {
-                timeout = setTimeout(() => resolve('timeout'), 2000)
-              })
+  /* ── Issue Tracker (v2 — GitHub read-only dashboard) ─────────────── */
+  ISSUES_TITLE: "Issue Tracker",
+  ISSUES_SUBTITLE: "Dashboard read-only da GitHub Issues — gestione via assistente AI",
+  ISSUES_SYNC: "Aggiorna",
+  ISSUES_SYNCING: "Caricamento…",
+  ISSUES_LAST_SYNC: "Ultimo aggiornamento",
+  ISSUES_NEVER_SYNCED: "Mai caricato",
+  ISSUES_STATUS_OPEN: "Open",
+  ISSUES_STATUS_CLOSED: "Closed",
+  ISSUES_STATUS_ALL: "Tutte",
+  ISSUES_LABEL_BUG: "bug",
+  ISSUES_LABEL_ENHANCEMENT: "enhancement",
+  ISSUES_LABEL_DS: "design-system",
+  ISSUES_LABEL_KATANA: "katana",
+  ISSUES_LABEL_NIGIRI: "nigiri",
+  ISSUES_LABEL_DOCS: "docs",
+  ISSUES_NO_RESULTS: "Nessuna issue trovata",
+  ISSUES_OPEN_GITHUB: "Apri su GitHub",
+  ISSUES_SYNC_ERROR: "Errore durante il caricamento",
+  ISSUES_LABEL_ALL: "Tutte le label",
+  ISSUES_SEARCH_PLACEHOLDER: "Cerca…",
+  ISSUES_EMPTY_TITLE: "Nessuna issue",
+  ISSUES_EMPTY_HINT: "Nessuna issue trovata su GitHub",
+  ISSUES_REPO: "zatteogit/katana",
+  ISSUES_LOAD_MORE: "Carica altre",
+  ISSUES_LOADING_PAGE: "Caricamento pagina {page}…",
+  ISSUES_TOTAL: "{count} issue totali",
+  ISSUES_PROGRESS: "Avanzamento",
+  ISSUES_BY_PHASE: "Per fase",
+  ISSUES_BY_LABEL: "Per label",
+  ISSUES_ASSIGNED_TO: "Assegnato a:",
+  ISSUES_CREATED_AT: "Creato:",
+  ISSUES_UPDATED_AT: "Aggiornato:",
+  ISSUES_CANCEL: "Annulla",
 
-              const scriptExecutedPromise = new Promise((resolve) => {
-                executeInterval = setInterval(() => {
-                  if (window.__iframeScriptExecuted__) {
-                    resolve('ready')
-                  }
-                }, 50)
-              })
+  /* ── Issue Tracker — legacy strings kept for BugReportFab ── */
+  ISSUES_NEW: "Nuova issue",
+  ISSUES_PLACEHOLDER_TITLE: "Titolo issue...",
+  ISSUES_PLACEHOLDER_BODY: "Descrizione (Markdown supportato)...",
+  ISSUES_CREATE: "Crea",
+  ISSUES_DELETE: "Elimina",
+  ISSUES_CONFIRM_DELETE: "Eliminare questa issue locale?",
+  ISSUES_CLOSE: "Chiudi",
+  ISSUES_REOPEN: "Riapri",
+  ISSUES_CONFIG_TITLE: "Configurazione GitHub",
+  ISSUES_CONFIG_REPO: "Repository (owner/repo)",
+  ISSUES_CONFIG_TOKEN: "Personal Access Token",
+  ISSUES_CONFIG_TOKEN_HINT: "Opzionale — necessario per creare issue e accedere a repo privati",
+  ISSUES_CONFIG_SAVE: "Salva",
+  ISSUES_CONFIG_TEST: "Testa Connessione",
+  ISSUES_CONFIG_TESTING: "Diagnostica in corso…",
+  ISSUES_CONFIG_CONNECTED: "Connesso",
+  ISSUES_CONFIG_DISCONNECTED: "Non connesso",
+  ISSUES_PUSH_TO_GITHUB: "Pubblica su GitHub",
+  ISSUES_PUSH_ERROR: "Errore durante il push",
+  ISSUES_PUSH_ALL: "Esporta tutto su GitHub",
+  ISSUES_PUSH_ALL_PROGRESS: "Push in corso…",
+  ISSUES_PUSH_ALL_COMPLETE: "Push completato",
+  ISSUES_PUSH_ALL_CONFIRM_TITLE: "Esporta issue su GitHub",
+  ISSUES_PUSH_ALL_CONFIRM_BODY: "Esportare {count} issue locali su GitHub?\nLe issue già presenti (stesso titolo) saranno saltate.\nQuesta operazione può richiedere qualche minuto.",
+  ISSUES_PUSH_ALL_DONE: "{ok} pushate, {skip} saltate (già presenti), {fail} errori",
+  ISSUES_PUSH_ALL_STAT_OK: "pushate",
+  ISSUES_PUSH_ALL_STAT_SKIP: "saltate",
+  ISSUES_PUSH_ALL_STAT_FAIL: "errori",
+  ISSUES_PUSH_ALL_NO_LOCAL: "Nessuna issue locale da esportare",
+  ISSUES_PUSH_ALL_NEED_TOKEN: "Configura repo + token per esportare",
+  ISSUES_CREATED_LOCALLY: "Creata localmente",
 
-              const result = await Promise.race([timeoutPromise, scriptExecutedPromise])
+  /* ── #204: Kanban view ─────────────────────────────────────────── */
+  ISSUES_VIEW_LIST: "Lista",
+  ISSUES_VIEW_KANBAN: "Board",
+  ISSUES_KANBAN_NO_PHASE: "Senza fase",
+  ISSUES_KANBAN_EMPTY_COL: "Nessuna issue",
 
-              clearTimeout(timeout)
-              clearInterval(executeInterval)
+  /* ── Kanban workflow board ─────────────────────────────────────── */
+  ISSUES_KB_ICEBOX: "Backlog", // renamed: icebox → backlog (issue-kanban-model v3.5)
+  ISSUES_KB_TRIAGE: "Triage",
+  ISSUES_KB_BACKLOG: "Backlog",
+  ISSUES_KB_READY: "Ready",
+  ISSUES_KB_DOING: "Doing",
+  ISSUES_KB_DONE: "Done",
+  ISSUES_KB_BLOCKED: "Bloccata",
+  ISSUES_KB_BLOCKED_BY: "Bloccata da",
+  ISSUES_KB_DOD: "DoD",
+  ISSUES_KB_DEPS: "Dipendenze",
+  ISSUES_KB_NO_DEPS: "Nessuna dipendenza",
+  ISSUES_KB_EPIC: "Epic",
+  ISSUES_KB_PRIORITY: "Priorità",
+  ISSUES_KB_FILTER_EPIC: "Filtra per epic",
+  ISSUES_KB_FILTER_PRIORITY: "Filtra per priorità",
+  ISSUES_KB_ALL_EPICS: "Tutte le epic",
+  ISSUES_KB_ALL_PRIORITIES: "Tutte",
+  ISSUES_KB_DROP_HERE: "Rilascia qui",
+  ISSUES_KB_RECENT_DAYS: "ultimi {n} giorni",
+  ISSUES_KB_MOVE_CONFIRM: "Spostare #{num} in {col}?",
+  ISSUES_BY_EPIC: "Per epic",
 
-              if (result === 'ready') {
-                sendReady()
-              } else {
-                sendMessage({
-                  method: 'status',
-                  state: 'script-timeout',
-                  isReady: false
-                })
-              }
-            }
+  /* ── GitHub extended metadata ───────────────────────────────────── */
+  ISSUES_AUTHOR: "Autore",
+  ISSUES_MILESTONE: "Milestone",
+  ISSUES_MILESTONES: "Milestones",
+  ISSUES_NO_MILESTONE: "Nessuna milestone",
+  ISSUES_ALL_MILESTONES: "Tutte",
+  ISSUES_KB_FILTER_MILESTONE: "Filtra per milestone",
+  ISSUES_KB_FILTER_AUTHOR: "Filtra per autore",
+  ISSUES_KB_ALL_AUTHORS: "Tutti",
+  ISSUES_MILESTONE_DUE: "Scadenza",
+  ISSUES_MILESTONE_OVERDUE: "Scaduta",
+  ISSUES_MILESTONE_PROGRESS: "Avanzamento milestone",
+  ISSUES_COMMENTS: "Commenti",
+  ISSUES_BY_MILESTONE: "Per milestone",
+  ISSUES_BY_AUTHOR: "Per autore",
+  ISSUES_ASSIGN_MILESTONE: "Assegna milestone",
 
-            script.onerror = (e) => {
-              sendMessage({
-                method: 'status',
-                state: 'script-load-error',
-                isReady: false,
-                error: e.message
-              })
-            }
+  /* ── #204: Release timeline ─────────────────────────────────────── */
+  ISSUES_RELEASES: "Release",
+  ISSUES_RELEASES_EMPTY: "Nessuna release trovata",
+  ISSUES_RELEASES_LOADING: "Caricamento release…",
 
-            script.src = e.data.initScriptURL
-            // https://sentry.io/answers/script-error/
-            script.crossOrigin = 'anonymous'
-            document.body.appendChild(script)
-          }
-        }
-      }
-    })
-  </script>
-</body>
+  /* ── DS Page — mode labels ────────────────────────────────────────── */
+  DS_MODE_DARK: "Dark Mode",
+  DS_MODE_LIGHT: "Light Mode",
 
-</html>
+  /* ── Timeline / Version History ─────────────────────────────────── */
+  TIMELINE_TITLE: "Storico versioni",
+  TIMELINE_SYNC_RELEASES: "Sync Releases",
+  TIMELINE_FROM_GITHUB: "da GitHub",
+  TIMELINE_LOCAL: "locale",
+
+  /* ── Common labels ─────────────────────────────────────────────── */
+  COMMON_TOKENS: "Tokens",
+  COMMON_CONSUMERS: "Consumers",
+  COMMON_COPIED: "Copiato!",
+  COMMON_COPY: "Copia",
+  COMMON_ITEMS: "Items",
+  COMMON_GENERATE: "Generate",
+  COMMON_SECONDARY: "Secondary",
+  COMMON_DISABLED: "Disabled",
+  COMMON_PRIMARY_CTA: "Primary CTA",
+
+  /* ── Bug Report / Feedback (#56, feat-017) ────────────────────── */
+  BUG_FAB_TOOLTIP: "Feedback & Segnalazioni",
+  BUG_MODAL_TITLE: "Feedback",
+  BUG_FIELD_TITLE: "Titolo",
+  BUG_FIELD_TITLE_PLACEHOLDER: "Descrivi brevemente",
+  BUG_FIELD_BODY: "Descrizione",
+  BUG_FIELD_BODY_PLACEHOLDER: "Cosa e' successo? Cosa ti aspettavi? Come riprodurlo?",
+  BUG_FIELD_CONTEXT: "Contesto rilevato",
+  BUG_SUBMIT: "Invia segnalazione",
+  BUG_CANCEL: "Annulla",
+  BUG_SUCCESS: "Segnalazione inviata — visibile in Dev Tools > Issues",
+  BUG_EMPTY_TITLE: "Inserisci un titolo per la segnalazione",
+  /* #56 feedback types */
+  FB_TYPE_BUG: "Bug",
+  FB_TYPE_FEATURE: "Feature Request",
+  FB_TYPE_IMPROVEMENT: "Miglioramento",
+  FB_TYPE_FEEDBACK: "Feedback",
+  FB_SEVERITY: "Severita",
+  FB_SEV_LOW: "Bassa",
+  FB_SEV_MEDIUM: "Media",
+  FB_SEV_HIGH: "Alta",
+  FB_SEV_CRITICAL: "Critica",
+  FB_CATEGORY: "Tipo",
+  FB_PLACEHOLDER_FEATURE: "Descrivi la funzionalita che vorresti",
+  FB_PLACEHOLDER_IMPROVEMENT: "Cosa potrebbe funzionare meglio?",
+  FB_PLACEHOLDER_FEEDBACK: "Condividi il tuo feedback",
+
+  /* ── Crop UX (feat-001) ────────────────────────────────────────── */
+  CROP_GRID_THIRDS: "Regola dei terzi",
+  CROP_GRID_CENTER: "Guide centratura",
+  CROP_RESET: "Reset",
+  CROP_KB_HINT: "Frecce: sposta crop · +/−: zoom (⌘ per x3) · R: reset · G: griglia · C: centratura",
+  CROP_ZOOM_LABEL: "Zoom",
+  CROP_DIM_SUBTITLE_H: "Altezza output target — trascina per variare",
+  CROP_DIM_SUBTITLE_W: "Larghezza output target — trascina per variare",
+  CROP_OVERLAY_FOCUS_TIP: "Zona di interesse: il soggetto dovrebbe trovarsi dentro questa area",
+  CROP_OVERLAY_TEXT_TIP: "Area Testi: zona coperta da testo UI — evita soggetti qui",
+  CROP_OVERLAY_BADGE_TIP: "Area Badge: zona coperta da loghi UI — evita soggetti qui",
+
+  /* ── Export Preview (feat-006) ──────────────────────────────────── */
+  PREVIEW_TITLE: "Anteprima output",
+  PREVIEW_BUTTON: "Anteprima",
+  PREVIEW_FORMAT: "Formato",
+  PREVIEW_SAFARI_JPG_NOTE: "Safari: fallback JPEG (WebP non supportato)",
+
+  /* ── Mixology (feat-024) ──────────────────────────────────────── */
+  MIXOLOGY_TITLE: "Mixology",
+  MIXOLOGY_KANJI: "彩",
+  MIXOLOGY_VERSION: "v2.0-beta1",
+  MIXOLOGY_SUBTITLE: "Gradienti accessibili per sfondi WCAG-compliant",
+  MIXOLOGY_DESCRIPTION:
+    "Genera gradienti lineari con contrasto regolato secondo WCAG 2.1. Scegli i colori di sfondo e il foreground, seleziona il livello di accessibilita' e premi Mix! per ottenere 5 varianti accessibili con naming a tema cocktail.",
+  MIXOLOGY_FEAT_WCAG: "Contrasto WCAG 2.1",
+  MIXOLOGY_FEAT_GRADIENT: "5 varianti gradient",
+  MIXOLOGY_FEAT_COCKTAIL: "Cocktail naming",
+  MIXOLOGY_FEAT_SVG: "Export SVG",
+  MIXOLOGY_EMPTY:
+    "Seleziona i colori e premi Mix! per generare gradienti accessibili.",
+  MIXOLOGY_CFG_TITLE: "Configurazione",
+  MIXOLOGY_CFG_WCAG: "Livello WCAG",
+  MIXOLOGY_CFG_COLORS: "Colori",
+  MIXOLOGY_CFG_CONTRAST_PREFIX: "contrasto ≥",
+  MIXOLOGY_VARIANTS_SUFFIX: "varianti · contrasto ≥",
+  MIXOLOGY_COPIED_SUFFIX: "copiato",
+  MIXOLOGY_TOAST_SVG: "SVG scaricato",
+  MIXOLOGY_LEGEND_LIGHTER: "Schiarito",
+  MIXOLOGY_LEGEND_DARKER: "Scurito",
+  MIXOLOGY_LEGEND_UNCHANGED: "Invariato",
+  MIXOLOGY_PRESET_BG: "Preset sfondo",
+  MIXOLOGY_PRESET_FG: "Preset testo",
+  MIXOLOGY_PRESET_ADD: "Aggiungi ai preset",
+  MIXOLOGY_PRESET_REMOVE: "Rimuovi preset",
+  MIXOLOGY_IMG_TITLE: "Colori estratti",
+  MIXOLOGY_IMG_PICK_HINT: "Clicca per assegnare a BG",
+  MIXOLOGY_IMG_APPLY: "Applica e Mix",
+  MIXOLOGY_IMG_CLOSE: "Chiudi",
+  MIXOLOGY_IMG_SELECTED: "selezionati",
+  MIXOLOGY_IMG_TOAST_OK: "Colori estratti dall'immagine",
+  MIXOLOGY_IMG_TOAST_ERR: "Errore nell'estrazione colori",
+
+  /* ── Codex / Shīto (feat-033, renamed #199) ──────────────────────── */
+  CODEX_TITLE: "Shīto",
+  CODEX_KANJI: "シート",
+  CODEX_VERSION: "v2.0-beta1",
+  CODEX_TAG: "Report Engine",
+  CODEX_SUBTITLE: "Generazione report tabulari da dati Excel",
+  CODEX_DESCRIPTION:
+    "Carica un file Excel, scegli il template (POLIS Coworking/Uffici o Libero), configura titolo e data, e genera report paginati in formato A4 pronti per la stampa PDF. Supporta rowspan automatico e colonne dinamiche.",
+  CODEX_FEAT_EXCEL: "Import Excel",
+  CODEX_FEAT_TEMPLATE: "Template POLIS/Libero",
+  CODEX_FEAT_PAGINATE: "Paginazione A4",
+  CODEX_FEAT_PRINT: "Stampa PDF",
+  CODEX_CFG_TITLE: "Configurazione Report",
+  CODEX_CFG_TEMPLATE: "Template Principale",
+  CODEX_CFG_SUBTYPE: "Tipologia Progetto POLIS",
+  CODEX_CFG_SUBTYPE_COWORKING: "Spazi Co-Working",
+  CODEX_CFG_SUBTYPE_UFFICI: "Uffici Postali",
+  CODEX_CFG_DATE: "Data Riferimento Report",
+  CODEX_CFG_REPORT_TITLE: "Titolo del Report",
+  CODEX_CFG_REPORT_TITLE_PLACEHOLDER: "Titolo del report...",
+  CODEX_CFG_COLUMNS: "Numero di Colonne",
+  CODEX_CFG_UPLOAD: "Caricamento Dati Excel",
+  CODEX_DROP_HINT: "Trascina il file Excel qui o clicca per selezionarlo",
+  CODEX_DROP_OK: "File caricato",
+  CODEX_DROP_ROWS: "righe",
+  CODEX_BTN_RESET: "Svuota",
+  CODEX_BTN_DOWNLOAD: "Scarica PDF",
+  CODEX_BTN_DOWNLOAD_BUSY: "Generazione…",
+  CODEX_ALERT_NO_FILE: "Carica un file Excel prima di generare il report.",
+  CODEX_ALERT_FILE_ERROR: "Errore nella lettura del file Excel.",
+  CODEX_PAGE_LABEL: "Pagina",
+  CODEX_PAGE_OF: "di",
+  CODEX_COL_REGIONE: "REGIONE",
+  CODEX_COL_PROVINCIA: "PROVINCIA",
+  CODEX_COL_COMUNE: "COMUNE",
+  CODEX_COL_PREFIX: "COLONNA",
+  CODEX_EMPTY: "Carica un file Excel per generare il report.",
+  CODEX_TEMPLATE_LIBERO: "LIBERO",
+  CODEX_TEMPLATE_POLIS: "POLIS",
+
+  /* ── Tempura (feat-043) ──────────────────────────────────────── */
+  TEMPURA_TITLE: "Tempura",
+  TEMPURA_KANJI: "天",
+  TEMPURA_VERSION: "v2.1-beta",
+  TEMPURA_TAG: "PPTX Converter",
+  TEMPURA_SUBTITLE: "Converti qualsiasi PPTX nel template corporate Poste Italiane",
+  TEMPURA_DESCRIPTION:
+    "Carica una presentazione PowerPoint sorgente, analizza il contenuto slide per slide, classifica automaticamente il layout piu' adatto dal template corporate PI, e genera un PPTX brandizzato pronto per la distribuzione.",
+  TEMPURA_FEAT_EXTRACT: "Estrazione contenuto PPTX",
+  TEMPURA_FEAT_CLASSIFY: "Classificazione automatica layout",
+  TEMPURA_FEAT_PREVIEW: "Preview pipeline interattiva",
+  TEMPURA_FEAT_GENERATE: "Generazione PPTX branded",
+  TEMPURA_CFG_TITLE: "Pipeline di Conversione",
+  TEMPURA_CFG_META: "Metadata Presentazione",
+  TEMPURA_CFG_META_TITLE: "Titolo Presentazione",
+  TEMPURA_CFG_META_TITLE_PLACEHOLDER: "Titolo della presentazione...",
+  TEMPURA_CFG_META_AUTHOR: "Autore",
+  TEMPURA_CFG_META_AUTHOR_PLACEHOLDER: "Nome autore...",
+  TEMPURA_DROP_HINT: "Trascina il file PPTX qui o clicca per selezionarlo",
+  TEMPURA_DROP_OK: "File caricato",
+  TEMPURA_DROP_SLIDES: "slide estratte",
+  TEMPURA_STEP_UPLOAD: "Caricamento",
+  TEMPURA_STEP_EXTRACT: "Estrazione",
+  TEMPURA_STEP_CLASSIFY: "Classificazione",
+  TEMPURA_STEP_PREVIEW: "Anteprima",
+  TEMPURA_STEP_GENERATE: "Generazione",
+  TEMPURA_BTN_EXTRACT: "Analizza PPTX",
+  TEMPURA_BTN_GENERATE: "Genera PPTX Poste",
+  TEMPURA_BTN_GENERATE_BUSY: "Generazione in corso...",
+  TEMPURA_BTN_RESET: "Nuovo file",
+  TEMPURA_BTN_DOWNLOAD: "Scarica PPTX",
+  TEMPURA_COL_SLIDE: "Slide",
+  TEMPURA_COL_TITLE: "Titolo",
+  TEMPURA_COL_LAYOUT: "Layout",
+  TEMPURA_COL_LINES: "Righe",
+  TEMPURA_COL_IMAGE: "Img",
+  TEMPURA_ALERT_NO_FILE: "Carica un file PPTX prima di avviare la conversione.",
+  TEMPURA_ALERT_FILE_ERROR: "Errore nella lettura del file PPTX.",
+  TEMPURA_TOAST_EXTRACT_OK: "Estrazione completata",
+  TEMPURA_TOAST_CLASSIFY_OK: "Classificazione completata",
+  TEMPURA_TOAST_GENERATE_OK: "PPTX generato con successo",
+  TEMPURA_EMPTY: "Carica un file PPTX sorgente per avviare la pipeline di conversione.",
+  TEMPURA_PIPELINE_READY: "Pipeline pronta",
+  TEMPURA_PIPELINE_DONE: "Conversione completata",
+
+  /* ── Footer ────────────────────────────────────────────────────── */
+  FOOTER_CREDIT: "Digital Media — Comunicazione",
+  FOOTER_YEAR: "2026",
+
+  /* ── Error Boundaries & Global Error Handler (feat-027) ─────── */
+  ERR_GENERIC_TITLE: "Errore",
+  ERR_GENERIC_HINT: "Qualcosa non ha funzionato. Puoi riprovare o tornare al launcher.",
+  ERR_NETWORK_TITLE: "Errore di rete",
+  ERR_NETWORK_HINT: "Controlla la connessione e riprova. Se il problema persiste, torna al launcher.",
+  ERR_NOT_FOUND_TITLE: "Pagina non trovata",
+  ERR_NOT_FOUND_DETAIL: "La pagina richiesta non esiste o e' stata spostata.",
+  ERR_HTTP_PREFIX: "Errore HTTP",
+  ERR_RETRY: "Riprova",
+  ERR_GLOBAL_TOAST: "Errore imprevisto",
+  ERR_PROMISE_TOAST: "Operazione fallita",
+
+  /* ── Command Palette (feat-108) ────────────────────────────────── */
+  CMD_PLACEHOLDER: "Cerca app, azioni…",
+  CMD_NO_RESULTS: "Nessun risultato",
+  CMD_GROUP_NAV: "Navigazione",
+  CMD_GROUP_ACTIONS: "Azioni rapide",
+  CMD_HINT_NAV: "naviga",
+  CMD_HINT_SELECT: "seleziona",
+  CMD_THEME_LIGHT: "Tema chiaro",
+  CMD_THEME_DARK: "Tema scuro",
+  CMD_THEME_DESC: "Alterna modalità chiaro / scuro",
+  CMD_SETTINGS: "Settings",
+  CMD_SETTINGS_DESC: "Gestione app e preferenze",
+  CMD_DEVTOOLS: "Dev Tools",
+  CMD_DEVTOOLS_DESC: "Diagnostica e strumenti sviluppatore",
+  CMD_DS: "Design System",
+  CMD_DS_DESC: "Token reference e catalogo UI",
+
+  /* ── Keyboard Shortcuts Overlay (feat-109) ─────────────────────── */
+  SHORTCUTS_TITLE: "Scorciatoie tastiera",
+  SHORTCUTS_GROUP_GLOBAL: "Globale",
+  SHORTCUTS_GROUP_KATANA: "Katana — Crop Editor",
+  SHORTCUTS_GROUP_NIGIRI: "Nigiri — Production Hub",
+  SHORTCUTS_GROUP_ISSUES: "Issue Tracker",
+  SHORTCUTS_CMD_K: "Command Palette",
+  SHORTCUTS_QUESTION: "Mostra scorciatoie",
+  SHORTCUTS_ESC: "Chiudi overlay / modale",
+  SHORTCUTS_ARROWS_CROP: "Sposta area di crop",
+  SHORTCUTS_ZOOM: "Zoom crop",
+  SHORTCUTS_RESET: "Reset crop",
+  SHORTCUTS_GRID: "Griglia terzi",
+  SHORTCUTS_CENTER: "Guide centratura",
+  SHORTCUTS_FULLSCREEN: "Fullscreen crop modal",
+  SHORTCUTS_PASTE: "Incolla immagine",
+  SHORTCUTS_VIEW_DASHBOARD: "Vista Dashboard",
+  SHORTCUTS_VIEW_EDITOR: "Vista Editor",
+  SHORTCUTS_VIEW_TABLE: "Vista Tabella",
+  SHORTCUTS_SEARCH: "Focus ricerca",
+  SHORTCUTS_CLOUD_PUSH: "Push cloud",
+  SHORTCUTS_NAV_ISSUES: "Naviga tra issue",
+  SHORTCUTS_OPEN_ISSUE: "Apri issue selezionata",
+  SHORTCUTS_FOOTER_HINT: "Premi ? per chiudere",
+} as const;
+
+export type StringKey = keyof typeof S;
