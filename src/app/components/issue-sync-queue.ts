@@ -175,8 +175,36 @@ export const SYNC_QUEUE: SyncOp[] = [
   // feat-117: BentoPageShell minHeight max(100%, 100dvh) — grid BG now fills viewport
   // feat-121: Mixology layout — header kanji+version, WCAG dropdown click-outside-close
   // feat-132: Shīto floating toolbar (PDF/Stampa/Nuovo/Share) — fixed bottom bar
-  // NB: all create ops (s51-create-*) still pending flush. Close ops will be
-  //     added once GitHub numbers are available.
+
+  /* ── s57: close 9 completed Φ-Polish issues (2nd batch: #329-344) ── */
+  { kind: "close", opId: "s57-close-117", localId: "feat-117", issueNumber: 329, reason: "completed" },
+  { kind: "close", opId: "s57-close-118", localId: "feat-118", issueNumber: 330, reason: "completed" },
+  { kind: "close", opId: "s57-close-119", localId: "feat-119", issueNumber: 331, reason: "completed" },
+  { kind: "close", opId: "s57-close-120", localId: "feat-120", issueNumber: 332, reason: "completed" },
+  { kind: "close", opId: "s57-close-121", localId: "feat-121", issueNumber: 333, reason: "completed" },
+  { kind: "close", opId: "s57-close-122", localId: "feat-122", issueNumber: 334, reason: "completed" },
+  { kind: "close", opId: "s57-close-123", localId: "feat-123", issueNumber: 335, reason: "completed" },
+  { kind: "close", opId: "s57-close-124", localId: "feat-124", issueNumber: 336, reason: "completed" },
+  { kind: "close", opId: "s57-close-132", localId: "feat-132", issueNumber: 344, reason: "completed" },
+
+  /* ── s57: close 16 duplicate issues (1st batch: #313-328) ───────── */
+  // These were created by an earlier flush; the canonical issues are #329-344.
+  { kind: "close", opId: "s57-dup-313", localId: "dup-117", issueNumber: 313, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-314", localId: "dup-118", issueNumber: 314, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-315", localId: "dup-119", issueNumber: 315, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-316", localId: "dup-120", issueNumber: 316, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-317", localId: "dup-121", issueNumber: 317, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-318", localId: "dup-122", issueNumber: 318, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-319", localId: "dup-123", issueNumber: 319, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-320", localId: "dup-124", issueNumber: 320, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-321", localId: "dup-125", issueNumber: 321, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-322", localId: "dup-126", issueNumber: 322, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-323", localId: "dup-127", issueNumber: 323, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-324", localId: "dup-128", issueNumber: 324, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-325", localId: "dup-129", issueNumber: 325, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-326", localId: "dup-130", issueNumber: 326, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-327", localId: "dup-131", issueNumber: 327, reason: "not_planned" },
+  { kind: "close", opId: "s57-dup-328", localId: "dup-132", issueNumber: 328, reason: "not_planned" },
 ];
 
 /* ================================================================== */
