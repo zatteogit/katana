@@ -1,114 +1,94 @@
-<!DOCTYPE html>
-<html>
+/**
+ * Bento — Router Configuration
+ * =============================
+ * Routes auto-generated from bento-app-registry.tsx (Φ6 feat-011).
+ * RootLayout is static (shell), all page components use React Router
+ * native `lazy` for proper loading states via `useNavigation()`.
+ *
+ * Pages:
+ *   /                          -> Launcher (Bento hub)
+ *   /katana                    -> Katana crop tool (accesso diretto)
+ *   /nigiri                    -> Nigiri (Production Hub)
+ *   /mixology                  -> Mixology (Accessible Gradient Generator)
+ *   /shiito                    -> Shīto (Report Engine Pro, ex Codex)
+ *   /codex                     -> alias per /shiito (#199)
+ *   /tempura                   -> Tempura (PPTX Template Converter)
+ *   /settings                  -> Settings (App management, #173)
+ *   /design-system             -> Design System reference (multi-route, feat-128)
+ *   /design-system/colors      -> DS Colors
+ *   /design-system/typography  -> DS Typography
+ *   /design-system/spacing     -> DS Spacing & Shape
+ *   /design-system/elevation   -> DS Depth & Elevation
+ *   /design-system/interaction -> DS Interaction
+ *   /design-system/motion      -> DS Motion
+ *   /design-system/components  -> DS Components
+ *   /design-system/data        -> DS Data & Status
+ *   /design-system/assets      -> DS Assets & Branding
+ *   /design-system/architecture -> DS Under the Hood
+ *   /devtools                  -> Bento Dev Tools (only in dev/preview)
+ *   *                          -> redirect -> /
+ */
 
-<body>
-  <script>
-    window.messagePort = null
+import { createBrowserRouter, redirect } from "react-router";
+import { RootLayout, HydrateFallback } from "./components/RootLayout";
+import { IS_DEV_ENV } from "./components/bento-utils";
+import { getRoutableApps, launcherLazy } from "./components/bento-app-registry";
+import { loadRemoteFlags, isAppEnabled, setDisabledRedirect } from "./components/feature-flags";
+import { getUserRoleDef } from "./components/user-profile";
+import { RouteErrorFallback } from "./components/ds/DSErrorBoundary";
 
-    const allowedOrigins = [
-      'https://figma-gov.com',
-      'https://www.figma.com',
-      'https://staging.figma.com',
-      'https://devenv01.figma.engineering',
-      'https://local.figma.engineering:8443',
-      'http://localhost:9000',
-    ]
+console.log("[Bento] routes.ts — all imports resolved OK");
 
-    const allowedOriginPatterns = [
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems:8443$/,
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems$/,
-    ]
-
-    function isAllowedOrigin(origin) {
-      return allowedOrigins.includes(origin) || allowedOriginPatterns.some(p => p.test(origin))
-    }
-
-    window.addEventListener('message', (e) => {
-      function sendMessage(data) {
-        if (window.messagePort) {
-          window.messagePort.postMessage({ data })
-        }
+/* ── Generate child routes from registry (exclude design-system — handled manually) ── */
+const appRoutes = getRoutableApps(IS_DEV_ENV)
+  .filter((app) => app.id !== "design-system")
+  .map((app) => ({
+    path: app.route.replace(/^\//, ""), // strip leading slash for child route
+    lazy: app.lazy,
+    ErrorBoundary: RouteErrorFallback,
+    // Guard: redirect to launcher if app is disabled via app toggle (#174: toast)
+    loader: () => {
+      if (app.visibility === "launcher" && !isAppEnabled(app.id)) {
+        setDisabledRedirect(app.id);
+        return redirect("/");
       }
-
-      if (isAllowedOrigin(e.origin)) {
-        if (e.data.type === 'iframe-init') {
-          window.messagePort = e.ports[0]
-          window.__PREVIEW_IFRAME_INITIAL_OPTIONS__ = e.data.previewIframeInitialOptions
-
-          sendMessage({
-            method: 'status',
-            state: 'init-received',
-            isReady: false
-          })
-
-          if (e.data.initScriptBlob) {
-            import(URL.createObjectURL(e.data.initScriptBlob))
-          } else {
-            const script = document.createElement('script')
-
-            script.onload = async () => {
-              function sendReady() {
-                sendMessage({
-                  method: 'status',
-                  state: 'ready',
-                  isReady: true
-                })
-              }
-
-              if (window.__iframeScriptExecuted__) {
-                sendReady()
-                return
-              }
-
-              let executeInterval = null
-              let timeout = null
-
-              const timeoutPromise = new Promise((resolve) => {
-                timeout = setTimeout(() => resolve('timeout'), 2000)
-              })
-
-              const scriptExecutedPromise = new Promise((resolve) => {
-                executeInterval = setInterval(() => {
-                  if (window.__iframeScriptExecuted__) {
-                    resolve('ready')
-                  }
-                }, 50)
-              })
-
-              const result = await Promise.race([timeoutPromise, scriptExecutedPromise])
-
-              clearTimeout(timeout)
-              clearInterval(executeInterval)
-
-              if (result === 'ready') {
-                sendReady()
-              } else {
-                sendMessage({
-                  method: 'status',
-                  state: 'script-timeout',
-                  isReady: false
-                })
-              }
-            }
-
-            script.onerror = (e) => {
-              sendMessage({
-                method: 'status',
-                state: 'script-load-error',
-                isReady: false,
-                error: e.message
-              })
-            }
-
-            script.src = e.data.initScriptURL
-            // https://sentry.io/answers/script-error/
-            script.crossOrigin = 'anonymous'
-            document.body.appendChild(script)
-          }
-        }
+      // #59 feat-015: gate DevTools by user role (dev only, unless IS_DEV_ENV override)
+      if (app.id === "devtools" && !IS_DEV_ENV && !getUserRoleDef().showDevTools) {
+        return redirect("/settings");
       }
-    })
-  </script>
-</body>
+      return null;
+    },
+  }));
 
-</html>
+/* ── feat-128: Design System multi-route (replaces single-page) ── */
+const dsLazy = () =>
+  import("./components/DesignSystemLayout").then((m) => ({ Component: m.DesignSystemLayout }));
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    Component: RootLayout,
+    HydrateFallback,
+    ErrorBoundary: RouteErrorFallback,
+    /* Load feature flags from KV store before first render.
+       This ensures flags are available when gated components mount.
+       Errors are caught inside loadRemoteFlags — never blocks boot. */
+    loader: async () => { await loadRemoteFlags(); return null; },
+    children: [
+      { index: true, lazy: launcherLazy, ErrorBoundary: RouteErrorFallback },
+      ...appRoutes,
+      /* feat-128: Design System — single wildcard route, internal section routing
+         to avoid AnimatedOutlet re-animating the layout on sub-section changes */
+      {
+        path: "design-system/*",
+        lazy: dsLazy,
+        ErrorBoundary: RouteErrorFallback,
+      },
+      /* #199: /codex alias → redirect to canonical /shiito */
+      { path: "codex", loader: () => redirect("/shiito") },
+      /* admin/deploy removed in s57 — redirect stale bookmarks */
+      { path: "admin/deploy", loader: () => redirect("/") },
+      { path: "*", loader: () => redirect("/") },
+    ],
+  },
+]);

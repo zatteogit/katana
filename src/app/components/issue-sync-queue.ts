@@ -205,6 +205,22 @@ export const SYNC_QUEUE: SyncOp[] = [
   { kind: "close", opId: "s57-dup-326", localId: "dup-130", issueNumber: 326, reason: "not_planned" },
   { kind: "close", opId: "s57-dup-327", localId: "dup-131", issueNumber: 327, reason: "not_planned" },
   { kind: "close", opId: "s57-dup-328", localId: "dup-132", issueNumber: 328, reason: "not_planned" },
+
+  /* ── s59: close 7 Φ-DS + Φ-Ops issues (#337-343) ─────────────── */
+  // feat-125: SectionHeader titles — resolved by multi-route context clarity (feat-128)
+  // feat-126: Components 07.7 — FigmaExport removed from DSPageNewPatterns
+  // feat-127: Team Avatars — deduplicated (removed full registry grid)
+  // feat-128: DS multi-route — DesignSystemLayout + 10 child routes
+  // feat-129: Nav active state — route-based NavLink (no scroll spy needed)
+  // feat-130: Avatar selection — user-profile.ts avatarId + SettingsPage picker
+  // feat-131: User avatar in header — BentoHeader displays profile avatar + name
+  { kind: "close", opId: "s59-close-125", localId: "feat-125", issueNumber: 337, reason: "completed" },
+  { kind: "close", opId: "s59-close-126", localId: "feat-126", issueNumber: 338, reason: "completed" },
+  { kind: "close", opId: "s59-close-127", localId: "feat-127", issueNumber: 339, reason: "completed" },
+  { kind: "close", opId: "s59-close-128", localId: "feat-128", issueNumber: 340, reason: "completed" },
+  { kind: "close", opId: "s59-close-129", localId: "feat-129", issueNumber: 341, reason: "completed" },
+  { kind: "close", opId: "s59-close-130", localId: "feat-130", issueNumber: 342, reason: "completed" },
+  { kind: "close", opId: "s59-close-131", localId: "feat-131", issueNumber: 343, reason: "completed" },
 ];
 
 /* ================================================================== */

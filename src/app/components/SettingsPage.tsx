@@ -64,6 +64,7 @@ import {
   useUserProfile,
   setUserRole,
   setDisplayName,
+  setAvatarId,
   applyRoleRecommendations,
   isAppRecommendedForRole,
   type UserRole,
@@ -75,6 +76,8 @@ import { MixologyLogo } from "./MixologyLogo";
 import { CodexLogo } from "./CodexLogo";
 import { TempuraLogo } from "./TempuraLogo";
 import { LOGO_PRESET } from "./design-system";
+import { TEAM_AVATAR_REGISTRY, getAvatarEntry } from "./nigiri/avatars";
+import { DEFAULT_TEAM_MEMBERS } from "./nigiri/constants";
 
 /* ------------------------------------------------------------------ */
 /* App Toggle Card — user-friendly version with role badge             */
@@ -280,7 +283,7 @@ export function SettingsPage() {
     resetAllFlags();
   }, []);
 
-  const { displayName, role } = useUserProfile();
+  const { displayName, role, avatarId } = useUserProfile();
   const currentRoleDef = USER_ROLES.find((r) => r.id === role) || USER_ROLES[3];
 
   const handleSetDisplayName = useCallback(
@@ -435,6 +438,119 @@ export function SettingsPage() {
                 onChange={handleSetDisplayName}
                 placeholder="Inserisci il tuo nome utente"
               />
+            </div>
+
+            {/* feat-130: Avatar picker */}
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: isDark ? DS.BG_CARD : DS.ON_LIGHT_BG,
+                border: `${DS.BORDER_WIDTH_THIN} solid ${isDark ? DS.BORDER_DEFAULT : DS.ON_LIGHT_BORDER}`,
+              }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className="font-mono font-bold"
+                  style={{
+                    fontSize: DS.FONT_SMALL,
+                    letterSpacing: DS.LS_WIDE,
+                    textTransform: "uppercase",
+                    color: isDark ? DS.TEXT_MUTED : DS.ON_LIGHT_TEXT_MUTED,
+                  }}
+                >
+                  Avatar
+                </span>
+                {avatarId && (
+                  <button
+                    onClick={() => setAvatarId("")}
+                    className="font-mono font-bold px-1.5 py-px transition-opacity hover:opacity-70"
+                    style={{
+                      fontSize: DS.FONT_NANO,
+                      letterSpacing: DS.LS_TIGHT,
+                      textTransform: "uppercase",
+                      color: DS.DATA_RED,
+                      backgroundColor: DS.BADGE_DANGER_BG,
+                      border: `${DS.BORDER_WIDTH_THIN} solid ${DS.BADGE_DANGER_BORDER}`,
+                    }}
+                  >
+                    Rimuovi
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {/* Guest option */}
+                <button
+                  onClick={() => setAvatarId("guest")}
+                  className="relative flex-shrink-0 overflow-hidden transition-all hover:opacity-80"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: DS.RADIUS_AVATAR,
+                    backgroundColor: isDark ? DS.BG_ELEVATED : DS.ON_LIGHT_GRAY_200,
+                    border: avatarId === "guest"
+                      ? `${DS.BORDER_WIDTH_THICK} solid ${DS.ACCENT}`
+                      : `${DS.BORDER_WIDTH_THIN} solid ${isDark ? DS.BORDER_DEFAULT : DS.ON_LIGHT_GRAY_300}`,
+                  }}
+                  title="Guest"
+                >
+                  <User className="w-5 h-5 mx-auto" style={{ color: isDark ? DS.TEXT_MUTED : DS.ON_LIGHT_TEXT_MUTED }} />
+                </button>
+                {/* Team members */}
+                {DEFAULT_TEAM_MEMBERS.map((member) => {
+                  const entry = getAvatarEntry(member.id);
+                  const isSelected = avatarId === member.id;
+                  return (
+                    <button
+                      key={member.id}
+                      onClick={() => setAvatarId(member.id)}
+                      className="relative flex-shrink-0 overflow-hidden transition-all hover:opacity-80"
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: DS.RADIUS_AVATAR,
+                        backgroundColor: member.color,
+                        backgroundImage: entry?.gradient || member.gradient || undefined,
+                        border: isSelected
+                          ? `${DS.BORDER_WIDTH_THICK} solid ${DS.ACCENT}`
+                          : `${DS.BORDER_WIDTH_THIN} solid ${isDark ? DS.BORDER_DEFAULT : DS.ON_LIGHT_GRAY_300}`,
+                      }}
+                      title={member.name}
+                    >
+                      {entry?.img ? (
+                        <img
+                          src={entry.img}
+                          alt={member.name}
+                          className="max-w-none"
+                          style={{
+                            position: "absolute",
+                            left: entry.crop?.left ?? "0%",
+                            top: entry.crop?.top ?? "0%",
+                            width: entry.crop?.width ?? "100%",
+                            height: entry.crop?.height ?? "100%",
+                            objectFit: "cover",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="flex items-center justify-center font-mono font-black w-full h-full"
+                          style={{ fontSize: 14, color: isDark ? DS.BG_DEEP : DS.ON_LIGHT_BG }}
+                        >
+                          {member.initials}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {avatarId && avatarId !== "guest" && (() => {
+                const sel = DEFAULT_TEAM_MEMBERS.find((m) => m.id === avatarId);
+                return sel ? (
+                  <p className="font-mono mt-2" style={{ fontSize: DS.FONT_SMALL, color: isDark ? DS.TEXT_SECONDARY : DS.ON_LIGHT_TEXT_SECONDARY }}>
+                    {sel.name} — {sel.role || sel.team || "Team"}
+                  </p>
+                ) : null;
+              })()}
             </div>
 
             {/* Role selector + apply recommendations */}

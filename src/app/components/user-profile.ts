@@ -1,114 +1,239 @@
-<!DOCTYPE html>
-<html>
+/**
+ * user-profile.ts — Profilazione utente Bento (#59 Φ6)
+ * =====================================================
+ * Sistema di ruoli utente per personalizzare la visibilità delle app
+ * e l'esperienza complessiva. Persistenza localStorage + hook React.
+ *
+ * Ruoli:
+ *   - designer:  Focus su Katana, Nigiri, Mixology (produzione asset)
+ *   - producer:  Focus su Nigiri, Katana (gestione produzioni)
+ *   - lead:      Tutto tranne DevTools (supervisione)
+ *   - dev:       Tutto incluso DevTools (sviluppo)
+ *
+ * @bento-manual-edit — rileggere prima di qualsiasi modifica
+ */
 
-<body>
-  <script>
-    window.messagePort = null
+import { useSyncExternalStore } from "react";
 
-    const allowedOrigins = [
-      'https://figma-gov.com',
-      'https://www.figma.com',
-      'https://staging.figma.com',
-      'https://devenv01.figma.engineering',
-      'https://local.figma.engineering:8443',
-      'http://localhost:9000',
-    ]
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
 
-    const allowedOriginPatterns = [
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems:8443$/,
-      /^https:\/\/[a-z0-9-]+\.figdev\.systems$/,
-    ]
+export type UserRole = "designer" | "producer" | "lead" | "dev";
 
-    function isAllowedOrigin(origin) {
-      return allowedOrigins.includes(origin) || allowedOriginPatterns.some(p => p.test(origin))
+export interface UserRoleDef {
+  id: UserRole;
+  label: string;
+  kanji: string;
+  description: string;
+  /** Suggested app IDs to enable (all others get disabled) */
+  recommendedApps: string[];
+  /** Whether DevTools should be visible */
+  showDevTools: boolean;
+}
+
+export interface UserProfile {
+  role: UserRole;
+  displayName: string;
+  /** Team avatar ID from TEAM_AVATAR_REGISTRY, or "guest" for generic */
+  avatarId: string;
+  /** ISO timestamp of last role change */
+  updatedAt: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* Role definitions                                                    */
+/* ------------------------------------------------------------------ */
+
+export const USER_ROLES: UserRoleDef[] = [
+  {
+    id: "designer",
+    label: "Designer",
+    kanji: "デザ",
+    description: "Produzione asset: crop immagini, gradienti, template. Focus su qualità visiva.",
+    recommendedApps: ["katana", "nigiri", "mixology"],
+    showDevTools: false,
+  },
+  {
+    id: "producer",
+    label: "Producer",
+    kanji: "プロデ",
+    description: "Gestione produzioni fotografiche, tracking asset, reportistica.",
+    recommendedApps: ["katana", "nigiri", "shiito"],
+    showDevTools: false,
+  },
+  {
+    id: "lead",
+    label: "Lead",
+    kanji: "リード",
+    description: "Supervisione team, tutte le app attive, report avanzati.",
+    recommendedApps: ["katana", "nigiri", "mixology", "shiito", "tempura"],
+    showDevTools: false,
+  },
+  {
+    id: "dev",
+    label: "Developer",
+    kanji: "デブ",
+    description: "Accesso completo incluso DevTools, feature flags, regression suite.",
+    recommendedApps: ["katana", "nigiri", "mixology", "shiito", "tempura"],
+    showDevTools: true,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Persistence                                                         */
+/* ------------------------------------------------------------------ */
+
+const LS_KEY = "bento-user-profile";
+
+const DEFAULT_PROFILE: UserProfile = {
+  role: "dev",
+  displayName: "",
+  avatarId: "",
+  updatedAt: new Date().toISOString(),
+};
+
+let _cache: UserProfile | null = null;
+const _listeners = new Set<() => void>();
+
+function _notify() {
+  for (const cb of _listeners) cb();
+}
+
+function _load(): UserProfile {
+  if (_cache) return _cache;
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Migrate: older profiles may lack avatarId
+      _cache = { ...DEFAULT_PROFILE, ...parsed };
+      return _cache!;
     }
+  } catch {
+    // corrupt storage
+  }
+  _cache = { ...DEFAULT_PROFILE };
+  return _cache;
+}
 
-    window.addEventListener('message', (e) => {
-      function sendMessage(data) {
-        if (window.messagePort) {
-          window.messagePort.postMessage({ data })
-        }
-      }
+function _save(profile: UserProfile) {
+  _cache = profile;
+  localStorage.setItem(LS_KEY, JSON.stringify(profile));
+  _notify();
+}
 
-      if (isAllowedOrigin(e.origin)) {
-        if (e.data.type === 'iframe-init') {
-          window.messagePort = e.ports[0]
-          window.__PREVIEW_IFRAME_INITIAL_OPTIONS__ = e.data.previewIframeInitialOptions
+/* ------------------------------------------------------------------ */
+/* Public API                                                          */
+/* ------------------------------------------------------------------ */
 
-          sendMessage({
-            method: 'status',
-            state: 'init-received',
-            isReady: false
-          })
+/** Get current user profile */
+export function getUserProfile(): UserProfile {
+  return _load();
+}
 
-          if (e.data.initScriptBlob) {
-            import(URL.createObjectURL(e.data.initScriptBlob))
-          } else {
-            const script = document.createElement('script')
+/** Get current role */
+export function getUserRole(): UserRole {
+  return _load().role;
+}
 
-            script.onload = async () => {
-              function sendReady() {
-                sendMessage({
-                  method: 'status',
-                  state: 'ready',
-                  isReady: true
-                })
-              }
+/** Get role definition for current role */
+export function getUserRoleDef(): UserRoleDef {
+  const role = getUserRole();
+  return USER_ROLES.find((r) => r.id === role) || USER_ROLES[3]; // fallback to dev
+}
 
-              if (window.__iframeScriptExecuted__) {
-                sendReady()
-                return
-              }
+/** Set user role (triggers re-render in useUserProfile) */
+export function setUserRole(role: UserRole) {
+  const current = _load();
+  _save({ ...current, role, updatedAt: new Date().toISOString() });
+}
 
-              let executeInterval = null
-              let timeout = null
+/** Set display name */
+export function setDisplayName(name: string) {
+  const current = _load();
+  _save({ ...current, displayName: name, updatedAt: new Date().toISOString() });
+}
 
-              const timeoutPromise = new Promise((resolve) => {
-                timeout = setTimeout(() => resolve('timeout'), 2000)
-              })
+/** Set avatar ID (team member id or "guest" or "" for none) — feat-130 */
+export function setAvatarId(avatarId: string) {
+  const current = _load();
+  _save({ ...current, avatarId, updatedAt: new Date().toISOString() });
+}
 
-              const scriptExecutedPromise = new Promise((resolve) => {
-                executeInterval = setInterval(() => {
-                  if (window.__iframeScriptExecuted__) {
-                    resolve('ready')
-                  }
-                }, 50)
-              })
+/** Get avatar ID */
+export function getAvatarId(): string {
+  return _load().avatarId;
+}
 
-              const result = await Promise.race([timeoutPromise, scriptExecutedPromise])
+/** Reset profile to defaults */
+export function resetUserProfile() {
+  _save({ ...DEFAULT_PROFILE, updatedAt: new Date().toISOString() });
+}
 
-              clearTimeout(timeout)
-              clearInterval(executeInterval)
+/**
+ * Apply role-based app recommendations.
+ * Enables apps in the role's recommendedApps list, disables others.
+ * @returns count of apps toggled
+ */
+export function applyRoleRecommendations(
+  role: UserRole,
+  setAppToggleFn: (appId: string, enabled: boolean) => void,
+  allAppIds: string[],
+): { enabled: number; disabled: number } {
+  const roleDef = USER_ROLES.find((r) => r.id === role) || USER_ROLES[3];
+  const recommended = new Set(roleDef.recommendedApps);
+  let enabled = 0;
+  let disabled = 0;
+  for (const appId of allAppIds) {
+    if (recommended.has(appId)) {
+      setAppToggleFn(appId, true);
+      enabled++;
+    } else {
+      setAppToggleFn(appId, false);
+      disabled++;
+    }
+  }
+  return { enabled, disabled };
+}
 
-              if (result === 'ready') {
-                sendReady()
-              } else {
-                sendMessage({
-                  method: 'status',
-                  state: 'script-timeout',
-                  isReady: false
-                })
-              }
-            }
+/**
+ * Check if an app is recommended for the given role.
+ */
+export function isAppRecommendedForRole(appId: string, role?: UserRole): boolean {
+  const r = role || getUserRole();
+  const roleDef = USER_ROLES.find((rd) => rd.id === r) || USER_ROLES[3];
+  return roleDef.recommendedApps.includes(appId);
+}
 
-            script.onerror = (e) => {
-              sendMessage({
-                method: 'status',
-                state: 'script-load-error',
-                isReady: false,
-                error: e.message
-              })
-            }
+/* ------------------------------------------------------------------ */
+/* React hooks                                                         */
+/* ------------------------------------------------------------------ */
 
-            script.src = e.data.initScriptURL
-            // https://sentry.io/answers/script-error/
-            script.crossOrigin = 'anonymous'
-            document.body.appendChild(script)
-          }
-        }
-      }
-    })
-  </script>
-</body>
+function subscribe(cb: () => void) {
+  _listeners.add(cb);
+  return () => { _listeners.delete(cb); };
+}
 
-</html>
+/** Hook: reactive user profile */
+export function useUserProfile(): UserProfile {
+  return useSyncExternalStore(subscribe, getUserProfile, getUserProfile);
+}
+
+/** Hook: reactive user role */
+export function useUserRole(): UserRole {
+  return useSyncExternalStore(
+    subscribe,
+    getUserRole,
+    getUserRole,
+  );
+}
+
+/** Hook: reactive role definition */
+export function useUserRoleDef(): UserRoleDef {
+  return useSyncExternalStore(
+    subscribe,
+    getUserRoleDef,
+    getUserRoleDef,
+  );
+}

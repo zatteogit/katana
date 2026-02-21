@@ -36,6 +36,9 @@ import { ArrowLeft, Sun, Moon } from "lucide-react";
 import { DS } from "../design-system";
 import { S } from "../strings";
 import { useBentoTheme } from "./ThemeContext";
+import { useUserProfile } from "../user-profile";
+import { getAvatarEntry } from "../nigiri/avatars";
+import { DEFAULT_TEAM_MEMBERS } from "../nigiri/constants";
 
 interface BentoHeaderProps {
   backTo?: string;
@@ -70,6 +73,7 @@ export function BentoHeader({
 }: BentoHeaderProps) {
   const { isDark: contextDark, toggleTheme } = useBentoTheme();
   const dark = darkOverride !== undefined ? darkOverride : contextDark;
+  const profile = useUserProfile();
 
   const resolvedIconBg = dark
     ? (iconBgDark ?? DS.BG_CARD)
@@ -161,9 +165,78 @@ export function BentoHeader({
           </p>
         </div>
 
-        {/* -- Right slot (children) + Dark toggle -- */}
+        {/* -- Right slot (children) + User avatar + Dark toggle -- */}
         <div className="ml-auto flex items-center gap-3 flex-shrink-0">
           {children}
+          {/* feat-131: User avatar from profile */}
+          {profile.avatarId && (() => {
+            const isGuest = profile.avatarId === "guest";
+            const member = !isGuest ? DEFAULT_TEAM_MEMBERS.find((m) => m.id === profile.avatarId) : null;
+            const entry = member ? getAvatarEntry(member.id) : null;
+            const avatarImg = entry?.img;
+            const crop = entry?.crop;
+            const bgColor = member?.color || (dark ? DS.BG_ELEVATED : DS.ON_LIGHT_GRAY_200);
+            const gradient = entry?.gradient || member?.gradient;
+            const displayName = profile.displayName || member?.name || "Guest";
+            const initials = member?.initials || displayName.charAt(0).toUpperCase() || "?";
+
+            return (
+              <Link
+                to="/settings"
+                className="hidden sm:flex items-center gap-2 transition-opacity hover:opacity-80"
+                title={`${displayName} — Impostazioni profilo`}
+              >
+                <div
+                  className="relative flex-shrink-0 overflow-hidden"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: DS.RADIUS_AVATAR,
+                    backgroundColor: bgColor,
+                    backgroundImage: gradient || undefined,
+                    border: `${DS.BORDER_WIDTH_THIN} solid ${dark ? DS.BORDER_DEFAULT : DS.ON_LIGHT_BORDER}`,
+                  }}
+                >
+                  {avatarImg ? (
+                    <img
+                      src={avatarImg}
+                      alt={displayName}
+                      className="max-w-none"
+                      style={{
+                        position: "absolute",
+                        left: crop?.left ?? "0%",
+                        top: crop?.top ?? "0%",
+                        width: crop?.width ?? "100%",
+                        height: crop?.height ?? "100%",
+                        objectFit: "cover",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  ) : (
+                    <span
+                      className="flex items-center justify-center font-mono font-black w-full h-full"
+                      style={{ fontSize: 11, color: dark ? DS.BG_DEEP : DS.ON_LIGHT_BG }}
+                    >
+                      {initials}
+                    </span>
+                  )}
+                </div>
+                {profile.displayName && (
+                  <span
+                    className="hidden md:inline font-mono font-bold"
+                    style={{
+                      fontSize: DS.FONT_TINY,
+                      color: dark ? DS.TEXT_SECONDARY : DS.ON_LIGHT_TEXT_SECONDARY,
+                      letterSpacing: DS.LS_TIGHT,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {profile.displayName}
+                  </span>
+                )}
+              </Link>
+            );
+          })()}
           {showThemeToggle && (
             <button
               onClick={toggleTheme}
