@@ -1,73 +1,114 @@
-/**
- * BentoPageShell — Shared page layout wrapper for all Bento routes.
- *
- * @bento-manual-edit — rileggere prima di qualsiasi modifica
- *
- * Provides:
- *   - min-h-screen flex flex-col (footer always at bottom)
- *   - Background grid pattern (toggleable — DS page doesn't use it)
- *   - Theme-aware background color transition
- *   - Consistent structure: children flow naturally, footer sits at end
- *
- * Usage:
- *   <BentoPageShell>
- *     <BentoHeader ... />
- *     <main className="flex-1 ...">content</main>
- *     <BentoFooter ... />
- *   </BentoPageShell>
- *
- * DevToolsPage uses `fullHeight` to get h-screen + overflow-hidden behavior.
- */
+<!DOCTYPE html>
+<html>
 
-import { DS } from "../design-system";
-import { useBentoTheme } from "./ThemeContext";
+<body>
+  <script>
+    window.messagePort = null
 
-interface BentoPageShellProps {
-  children: React.ReactNode;
-  /** Show the 40px grid background pattern (default: true) */
-  grid?: boolean;
-  /** Use h-screen + overflow-hidden instead of min-h-screen (IDE layout) */
-  fullHeight?: boolean;
-  /** Extra inline styles on the outer div */
-  style?: React.CSSProperties;
-  /** Extra className on the outer div */
-  className?: string;
-}
+    const allowedOrigins = [
+      'https://figma-gov.com',
+      'https://www.figma.com',
+      'https://staging.figma.com',
+      'https://devenv01.figma.engineering',
+      'https://local.figma.engineering:8443',
+      'http://localhost:9000',
+    ]
 
-export function BentoPageShell({
-  children,
-  grid = true,
-  fullHeight = false,
-  style,
-  className = "",
-}: BentoPageShellProps) {
-  const { isDark } = useBentoTheme();
+    const allowedOriginPatterns = [
+      /^https:\/\/[a-z0-9-]+\.figdev\.systems:8443$/,
+      /^https:\/\/[a-z0-9-]+\.figdev\.systems$/,
+    ]
 
-  const bgColor = isDark ? DS.BG_SURFACE : DS.ON_LIGHT_BG;
+    function isAllowedOrigin(origin) {
+      return allowedOrigins.includes(origin) || allowedOriginPatterns.some(p => p.test(origin))
+    }
 
-  const gridBg = grid
-    ? {
-        backgroundImage: `linear-gradient(${isDark ? DS.BORDER_SUBTLE : DS.ON_LIGHT_GRID} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? DS.BORDER_SUBTLE : DS.ON_LIGHT_GRID} 1px, transparent 1px)`,
-        backgroundSize: "40px 40px",
-        backgroundPosition: "-1px -1px",
+    window.addEventListener('message', (e) => {
+      function sendMessage(data) {
+        if (window.messagePort) {
+          window.messagePort.postMessage({ data })
+        }
       }
-    : {};
 
-  return (
-    <div
-      className={`${fullHeight ? "h-screen overflow-hidden" : ""} flex flex-col flex-1 ${className}`}
-      style={{
-        backgroundColor: bgColor,
-        ...gridBg,
-        transition: `background-color ${DS.TRANSITION_NORMAL}`,
-        /* feat-117 fix: 100% fills the absolute-positioned AnimatedOutlet parent,
-           100dvh is a fallback for direct-render contexts (no flex parent).
-           max() picks whichever is larger, so content can still grow beyond viewport. */
-        ...(fullHeight ? {} : { minHeight: "max(100%, 100dvh)" }),
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+      if (isAllowedOrigin(e.origin)) {
+        if (e.data.type === 'iframe-init') {
+          window.messagePort = e.ports[0]
+          window.__PREVIEW_IFRAME_INITIAL_OPTIONS__ = e.data.previewIframeInitialOptions
+
+          sendMessage({
+            method: 'status',
+            state: 'init-received',
+            isReady: false
+          })
+
+          if (e.data.initScriptBlob) {
+            import(URL.createObjectURL(e.data.initScriptBlob))
+          } else {
+            const script = document.createElement('script')
+
+            script.onload = async () => {
+              function sendReady() {
+                sendMessage({
+                  method: 'status',
+                  state: 'ready',
+                  isReady: true
+                })
+              }
+
+              if (window.__iframeScriptExecuted__) {
+                sendReady()
+                return
+              }
+
+              let executeInterval = null
+              let timeout = null
+
+              const timeoutPromise = new Promise((resolve) => {
+                timeout = setTimeout(() => resolve('timeout'), 2000)
+              })
+
+              const scriptExecutedPromise = new Promise((resolve) => {
+                executeInterval = setInterval(() => {
+                  if (window.__iframeScriptExecuted__) {
+                    resolve('ready')
+                  }
+                }, 50)
+              })
+
+              const result = await Promise.race([timeoutPromise, scriptExecutedPromise])
+
+              clearTimeout(timeout)
+              clearInterval(executeInterval)
+
+              if (result === 'ready') {
+                sendReady()
+              } else {
+                sendMessage({
+                  method: 'status',
+                  state: 'script-timeout',
+                  isReady: false
+                })
+              }
+            }
+
+            script.onerror = (e) => {
+              sendMessage({
+                method: 'status',
+                state: 'script-load-error',
+                isReady: false,
+                error: e.message
+              })
+            }
+
+            script.src = e.data.initScriptURL
+            // https://sentry.io/answers/script-error/
+            script.crossOrigin = 'anonymous'
+            document.body.appendChild(script)
+          }
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
